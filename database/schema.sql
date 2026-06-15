@@ -27,10 +27,12 @@ CREATE TABLE public.trabajadores (
 -- 2. Tabla de Pacientes
 CREATE TABLE public.pacientes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    codigo VARCHAR(50) UNIQUE, -- ID visual del paciente (ej. '45902-B')
     nombre VARCHAR(255) NOT NULL,
     dni VARCHAR(15) UNIQUE NOT NULL,
     telefono VARCHAR(20),
     email VARCHAR(255),
+    referido_por_id UUID REFERENCES public.trabajadores(id) ON DELETE SET NULL, -- Referidor (médico/jaladora)
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
@@ -52,12 +54,23 @@ CREATE TABLE public.paquetes_cliente (
     precio_venta DECIMAL(10,2) NOT NULL CHECK (precio_venta >= 0.00),
     pagado DECIMAL(10,2) NOT NULL DEFAULT 0.00 CHECK (pagado >= 0.00),
     deuda DECIMAL(10,2) NOT NULL DEFAULT 0.00 CHECK (deuda >= 0.00),
+    sesiones_realizadas INTEGER NOT NULL DEFAULT 0 CHECK (sesiones_realizadas >= 0), -- Sesiones consumidas
     estado estado_paquete_cliente NOT NULL DEFAULT 'Deuda',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT chk_deuda_pagado CHECK (pagado + deuda = precio_venta)
 );
 
--- 5. Tabla de Sesiones de Caja
+-- 5. Tabla de Registro de Sesiones del Paciente (Detalle clínico/asistencia)
+CREATE TABLE public.sesiones_paciente (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    paquete_cliente_id UUID NOT NULL REFERENCES public.paquetes_cliente(id) ON DELETE CASCADE,
+    fecha TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    terapeuta_id UUID NOT NULL REFERENCES public.trabajadores(id), -- Terapeuta que atendió la sesión
+    notas TEXT, -- Comentarios o evolución del paciente en la sesión
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+-- 6. Tabla de Sesiones de Caja
 CREATE TABLE public.sesiones_caja (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     abierto_por UUID REFERENCES public.trabajadores(id),
@@ -69,27 +82,30 @@ CREATE TABLE public.sesiones_caja (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
--- 6. Tabla de Movimientos Financieros (Libro Diario)
+-- 7. Tabla de Movimientos Financieros (Libro Diario)
 CREATE TABLE public.movimientos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     caja_id UUID NOT NULL REFERENCES public.sesiones_caja(id),
     tipo tipo_movimiento NOT NULL,
     concepto VARCHAR(255) NOT NULL, -- ej. 'Pago de Sesión', 'Gasto Luz', etc.
+    categoria VARCHAR(100), -- Categoría del movimiento (ej. 'Rehabilitación', 'Gasto Operativo', 'Nómina', 'Tecnología')
     metodo metodo_pago NOT NULL DEFAULT 'Efectivo',
     monto DECIMAL(10,2) NOT NULL CHECK (monto > 0.00),
+    estado VARCHAR(50) NOT NULL DEFAULT 'Completado', -- Estado visual de la transacción (ej. 'Completado', 'Pendiente')
     nota TEXT,
     paquete_cliente_id UUID REFERENCES public.paquetes_cliente(id) ON DELETE SET NULL, -- Para trazabilidad
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
--- 7. Tabla de Control de Comisiones
+-- 8. Tabla de Control de Comisiones
 CREATE TABLE public.comisiones (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     trabajador_id UUID NOT NULL REFERENCES public.trabajadores(id) ON DELETE CASCADE,
     paciente_id UUID NOT NULL REFERENCES public.pacientes(id),
     monto DECIMAL(10,2) NOT NULL CHECK (monto >= 0.00),
     estado estado_comision NOT NULL DEFAULT 'Pendiente',
-    movimiento_id UUID REFERENCES public.movimientos(id) ON DELETE SET NULL, -- Asocia la liquidación
+    movimiento_id UUID REFERENCES public.movimientos(id) ON DELETE SET NULL, -- Asocia la liquidación (Egreso)
+    fecha_comision DATE DEFAULT CURRENT_DATE NOT NULL, -- Fecha de la comisión registrada
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
@@ -98,13 +114,14 @@ ALTER TABLE public.trabajadores ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pacientes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.paquetes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.paquetes_cliente ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.sesiones_paciente ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sesiones_caja ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.movimientos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.comisiones ENABLE ROW LEVEL SECURITY;
 
 -- Creación de Políticas de Seguridad (RLS)
 
--- 1. Política de Lectura (Cualquier usuario autenticado puede leer datos)
+-- 1. Políticas de Lectura (Cualquier usuario autenticado puede leer datos)
 CREATE POLICY "Permitir lectura a usuarios autenticados" 
 ON public.trabajadores FOR SELECT TO authenticated USING (true);
 
@@ -118,6 +135,9 @@ CREATE POLICY "Permitir lectura a usuarios autenticados"
 ON public.paquetes_cliente FOR SELECT TO authenticated USING (true);
 
 CREATE POLICY "Permitir lectura a usuarios autenticados" 
+ON public.sesiones_paciente FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Permitir lectura a usuarios autenticados" 
 ON public.sesiones_caja FOR SELECT TO authenticated USING (true);
 
 CREATE POLICY "Permitir lectura a usuarios autenticados" 
@@ -127,7 +147,6 @@ CREATE POLICY "Permitir lectura a usuarios autenticados"
 ON public.comisiones FOR SELECT TO authenticated USING (true);
 
 -- 2. Políticas de Escritura (Modificaciones de datos)
--- Para transacciones y caja, permitimos inserciones a personal de caja/staff autenticado.
 CREATE POLICY "Permitir inserción a usuarios autenticados" 
 ON public.movimientos FOR INSERT TO authenticated WITH CHECK (true);
 
@@ -138,10 +157,12 @@ CREATE POLICY "Permitir inserción y actualización a usuarios autenticados"
 ON public.paquetes_cliente FOR ALL TO authenticated USING (true);
 
 CREATE POLICY "Permitir inserción y actualización a usuarios autenticados" 
+ON public.sesiones_paciente FOR ALL TO authenticated USING (true);
+
+CREATE POLICY "Permitir inserción y actualización a usuarios autenticados" 
 ON public.sesiones_caja FOR ALL TO authenticated USING (true);
 
--- 3. Políticas restrictivas de Administración (Trabajadores y Catálogo de Paquetes)
--- Asumimos que los administradores tienen un claim en su JWT metadata ej: `is_admin = true`
+-- 3. Políticas restrictivas de Administración (Trabajadores, Catálogo de Paquetes y Comisiones)
 CREATE POLICY "Permitir CRUD completo solo a administradores" 
 ON public.trabajadores FOR ALL TO authenticated 
 USING (auth.jwt() -> 'user_metadata' ->> 'role' = 'admin');
