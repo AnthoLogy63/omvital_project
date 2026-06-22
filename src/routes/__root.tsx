@@ -7,6 +7,7 @@ import {
   useRouterState,
   HeadContent,
   Scripts,
+  redirect,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
@@ -92,6 +93,23 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  beforeLoad: async ({ location }) => {
+    // Si la persona intenta ir a login se permite sin trabas
+    if (location.pathname === '/login') return
+
+    const { supabase } = await import('../lib/supabase')
+    const { data } = await supabase.auth.getSession()
+
+    // Si no hay una sesión activa, se manda a la pantalla de login
+    if (!data.session) {
+      throw redirect({
+        to: '/login',
+        search: {
+          redirect: location.href,
+        },
+      })
+    }
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -149,6 +167,7 @@ const NAV = [
 
 function Sidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const router = useRouter();
   return (
     <aside className="fixed left-0 top-0 h-full w-[260px] border-r border-primary flex flex-col z-50 overflow-y-auto bg-primary-container">
       <div className="px-6 py-8">
@@ -179,10 +198,18 @@ function Sidebar() {
           <span className="material-symbols-outlined mr-3">settings</span>
           <span className="font-label-md text-label-md">Configuración</span>
         </a>
-        <a className="flex items-center px-4 py-3 hover:bg-white/10 transition-colors duration-200 text-white" href="#">
+        <button
+          onClick={async () => {
+            const { supabase } = await import('../lib/supabase')
+            await supabase.auth.signOut()
+            router.navigate({ to: '/login' })
+            router.invalidate()
+          }}
+          className="w-full flex items-center px-4 py-3 hover:bg-white/10 transition-colors duration-200 text-white cursor-pointer text-left"
+        >
           <span className="material-symbols-outlined mr-3">logout</span>
           <span className="font-label-md text-label-md">Cerrar Sesión</span>
-        </a>
+        </button>
       </div>
     </aside>
   );
@@ -222,11 +249,27 @@ function TopBar() {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  // Evaluamos la ruta actual del sistema
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isLoginPage = pathname === '/login';
+
   return (
     <QueryClientProvider client={queryClient}>
-      <Sidebar />
-      <TopBar />
-      <Outlet />
+      {isLoginPage ? (
+        // Si está en el login, renderiza el contenido limpio sin barras laterales ni superiores
+        <main className="w-full min-h-screen bg-background overflow-y-auto">
+          <Outlet />
+        </main>
+      ) : (
+        // Si es cualquier otra página, mantiene el Layout con Sidebar y TopBar para tus compañeros
+        <>
+          <Sidebar />
+          <TopBar />
+          <main className="pl-[260px] pt-[64px] h-screen overflow-y-auto bg-background">
+            <Outlet />
+          </main>
+        </>
+      )}
     </QueryClientProvider>
   );
 }
