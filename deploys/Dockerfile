@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM oven/bun:1.1-alpine AS builder
+FROM oven/bun:alpine AS builder
 WORKDIR /app
 
 # Copy package files
@@ -13,7 +13,7 @@ COPY src ./src
 RUN bun run build
 
 # Stage 2: Production runner
-FROM oven/bun:1.1-alpine AS runner
+FROM oven/bun:alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
