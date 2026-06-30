@@ -27,7 +27,7 @@ try {
       apikey: supabaseKey,
     },
   });
-  
+
   if (response.ok) {
     console.log(`✅ Conexión HTTP exitosa. Status: ${response.status} ${response.statusText}`);
     const data = await response.json();

@@ -2,13 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { 
-  getTrabajadores, 
-  insertTrabajador, 
+import {
+  getTrabajadores,
+  insertTrabajador,
   updateTrabajador,
-  getReferenciadoresDestacados, 
-  type DbTrabajador, 
-  type ReferenciadorDestacado 
+  getReferenciadoresDestacados,
+  type DbTrabajador,
+  type ReferenciadorDestacado,
 } from "../lib/api/workers";
 
 export const Route = createFileRoute("/trabajadores")({
@@ -34,7 +34,9 @@ function TrabajadoresPage() {
 
   // Filters State
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterRol, setFilterRol] = useState<"Todos" | "Interno" | "Médico Externo" | "Jaladora">("Todos");
+  const [filterRol, setFilterRol] = useState<"Todos" | "Interno" | "Médico Externo" | "Jaladora">(
+    "Todos",
+  );
   const [filterEstado, setFilterEstado] = useState<"Todos" | "Activo" | "Inactivo">("Todos");
 
   const [formData, setFormData] = useState({
@@ -54,12 +56,12 @@ function TrabajadoresPage() {
       try {
         setIsLoading(true);
         setIsFeaturedLoading(true);
-        
+
         const [workersData, featuredData] = await Promise.all([
           getTrabajadores(),
-          getReferenciadoresDestacados()
+          getReferenciadoresDestacados(),
         ]);
-        
+
         setWorkers(workersData);
         setFeaturedReferrers(featuredData);
       } catch (err: any) {
@@ -208,7 +210,11 @@ function TrabajadoresPage() {
     const pageW = doc.internal.pageSize.getWidth();
     const pageH = doc.internal.pageSize.getHeight();
     const now = new Date();
-    const dateStr = now.toLocaleDateString("es-PE", { year: "numeric", month: "long", day: "numeric" });
+    const dateStr = now.toLocaleDateString("es-PE", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
     const timeStr = now.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
 
     // ── Background header bar ─────────────────────────────────────────────
@@ -243,11 +249,31 @@ function TrabajadoresPage() {
     const totalJaladoras = workers.filter((w) => w.rol === "Jaladora").length;
 
     const cards = [
-      { label: "Total Personal",   value: String(totalPersonal),  color: [30, 64, 175]  as [number,number,number] },
-      { label: "Internos",         value: String(totalInternos),  color: [2, 132, 199]  as [number,number,number] },
-      { label: "Médicos Externos", value: String(totalMedicos),   color: [5, 150, 105]  as [number,number,number] },
-      { label: "Jaladoras",        value: String(totalJaladoras), color: [124, 58, 237] as [number,number,number] },
-      { label: "Activos",          value: `${pctActivos}%`,       color: [217, 119, 6]  as [number,number,number] },
+      {
+        label: "Total Personal",
+        value: String(totalPersonal),
+        color: [30, 64, 175] as [number, number, number],
+      },
+      {
+        label: "Internos",
+        value: String(totalInternos),
+        color: [2, 132, 199] as [number, number, number],
+      },
+      {
+        label: "Médicos Externos",
+        value: String(totalMedicos),
+        color: [5, 150, 105] as [number, number, number],
+      },
+      {
+        label: "Jaladoras",
+        value: String(totalJaladoras),
+        color: [124, 58, 237] as [number, number, number],
+      },
+      {
+        label: "Activos",
+        value: `${pctActivos}%`,
+        color: [217, 119, 6] as [number, number, number],
+      },
     ];
 
     const cardW = (pageW - 20) / 5 - 2.4;
@@ -281,13 +307,15 @@ function TrabajadoresPage() {
       filterRol !== "Todos" ? `Rol: ${filterRol}` : "",
       filterEstado !== "Todos" ? `Estado: ${filterEstado}` : "",
       searchQuery ? `Búsqueda: "${searchQuery}"` : "",
-    ].filter(Boolean).join(" · ");
+    ]
+      .filter(Boolean)
+      .join(" · ");
     doc.text(
       filterLabel
         ? `Filtros aplicados — ${filterLabel} — ${filteredWorkers.length} de ${workers.length} registros`
         : `Mostrando todos los registros (${filteredWorkers.length})`,
       10,
-      tableStartY - 3
+      tableStartY - 3,
     );
 
     // ── Main table ────────────────────────────────────────────────────────
@@ -312,7 +340,11 @@ function TrabajadoresPage() {
         cellPadding: { top: 6, bottom: 6, left: 5, right: 5 },
       },
       alternateRowStyles: { fillColor: [248, 250, 252] },
-      bodyStyles: { fontSize: 8.5, textColor: [30, 41, 59], cellPadding: { top: 6, bottom: 6, left: 5, right: 5 } },
+      bodyStyles: {
+        fontSize: 8.5,
+        textColor: [30, 41, 59],
+        cellPadding: { top: 6, bottom: 6, left: 5, right: 5 },
+      },
       columnStyles: {
         0: { halign: "center", cellWidth: 8 },
         1: { fontStyle: "bold", cellWidth: 52 },
@@ -338,7 +370,9 @@ function TrabajadoresPage() {
             data.cell.y + 2,
             data.cell.width - 4,
             data.cell.height - 4,
-            1, 1, "F"
+            1,
+            1,
+            "F",
           );
           doc.setFontSize(7.5);
           doc.setFont("helvetica", "bold");
@@ -346,7 +380,7 @@ function TrabajadoresPage() {
             estado || "",
             data.cell.x + data.cell.width / 2,
             data.cell.y + data.cell.height / 2 + 0.8,
-            { align: "center" }
+            { align: "center" },
           );
         }
       },
@@ -364,7 +398,11 @@ function TrabajadoresPage() {
       doc.setFontSize(7);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(148, 163, 184);
-      doc.text("OMVITAL — Sistema de Gestión Integral · Documento generado automáticamente", 10, pageH - 3.5);
+      doc.text(
+        "OMVITAL — Sistema de Gestión Integral · Documento generado automáticamente",
+        10,
+        pageH - 3.5,
+      );
       doc.text(`Pág. ${i} / ${totalPages}`, pageW - 10, pageH - 3.5, { align: "right" });
     }
 
@@ -378,7 +416,8 @@ function TrabajadoresPage() {
     const matchesSearch =
       worker.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
       worker.dni.includes(searchQuery) ||
-      (worker.especialidad && worker.especialidad.toLowerCase().includes(searchQuery.toLowerCase()));
+      (worker.especialidad &&
+        worker.especialidad.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesRol && matchesEstado && matchesSearch;
   });
 
@@ -405,12 +444,17 @@ function TrabajadoresPage() {
         {/* Bento Grid - Stats */}
         <div className="col-span-12 md:col-span-4 border border-outline-variant rounded-xl p-stack_md bg-white flex items-center">
           <div className="w-12 h-12 rounded-full bg-primary-container/10 text-primary flex items-center justify-center mr-4">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+            <span
+              className="material-symbols-outlined"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
               groups
             </span>
           </div>
           <div>
-            <p className="text-caption text-on-surface-variant uppercase tracking-wider font-semibold">Total Personal</p>
+            <p className="text-caption text-on-surface-variant uppercase tracking-wider font-semibold">
+              Total Personal
+            </p>
             <p className="font-headline-md text-headline-md">
               {isLoading ? "Cargando..." : workers.length}
             </p>
@@ -418,12 +462,17 @@ function TrabajadoresPage() {
         </div>
         <div className="col-span-12 md:col-span-4 border border-outline-variant rounded-xl p-stack_md bg-white flex items-center">
           <div className="w-12 h-12 rounded-full bg-secondary-container/20 text-secondary flex items-center justify-center mr-4">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+            <span
+              className="material-symbols-outlined"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
               medical_services
             </span>
           </div>
           <div>
-            <p className="text-caption text-on-surface-variant uppercase tracking-wider font-semibold">Médicos Externos</p>
+            <p className="text-caption text-on-surface-variant uppercase tracking-wider font-semibold">
+              Médicos Externos
+            </p>
             <p className="font-headline-md text-headline-md">
               {isLoading ? "Cargando..." : workers.filter((w) => w.rol === "Médico Externo").length}
             </p>
@@ -431,18 +480,23 @@ function TrabajadoresPage() {
         </div>
         <div className="col-span-12 md:col-span-4 border border-outline-variant rounded-xl p-stack_md bg-white flex items-center">
           <div className="w-12 h-12 rounded-full bg-tertiary-container/10 text-tertiary flex items-center justify-center mr-4">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+            <span
+              className="material-symbols-outlined"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
               trending_up
             </span>
           </div>
           <div>
-            <p className="text-caption text-on-surface-variant uppercase tracking-wider font-semibold">Activos</p>
+            <p className="text-caption text-on-surface-variant uppercase tracking-wider font-semibold">
+              Activos
+            </p>
             <p className="font-headline-md text-headline-md">
               {isLoading
                 ? "Cargando..."
                 : workers.length > 0
-                ? `${Math.round((workers.filter((w) => w.estado === "Activo").length / workers.length) * 100)}%`
-                : "0%"}
+                  ? `${Math.round((workers.filter((w) => w.estado === "Activo").length / workers.length) * 100)}%`
+                  : "0%"}
             </p>
           </div>
         </div>
@@ -460,14 +514,16 @@ function TrabajadoresPage() {
                     : "border-outline-variant bg-white text-on-surface-variant hover:bg-surface-container-low"
                 }`}
               >
-                <span className="material-symbols-outlined text-[18px] mr-1">filter_alt</span> Filtrar
+                <span className="material-symbols-outlined text-[18px] mr-1">filter_alt</span>{" "}
+                Filtrar
               </button>
-              <button 
+              <button
                 onClick={handleExportPDF}
                 disabled={filteredWorkers.length === 0}
                 className="px-3 py-1.5 border border-outline-variant rounded bg-white text-on-surface-variant text-label-md flex items-center hover:bg-surface-container-low cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span className="material-symbols-outlined text-[18px] mr-1">picture_as_pdf</span> Exportar PDF
+                <span className="material-symbols-outlined text-[18px] mr-1">picture_as_pdf</span>{" "}
+                Exportar PDF
               </button>
             </div>
           </div>
@@ -523,83 +579,121 @@ function TrabajadoresPage() {
             <table className="w-full text-left border-collapse">
               <thead className="bg-[#F8FAFB]">
                 <tr>
-                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">TRABAJADOR</th>
-                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">DNI / ID</th>
-                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">ROL</th>
-                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant text-center">TASA COMISIÓN</th>
-                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">ESTADO</th>
-                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant text-right">ACCIONES</th>
+                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">
+                    TRABAJADOR
+                  </th>
+                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">
+                    DNI / ID
+                  </th>
+                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">
+                    ROL
+                  </th>
+                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant text-center">
+                    TASA COMISIÓN
+                  </th>
+                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant">
+                    ESTADO
+                  </th>
+                  <th className="px-6 py-3 font-label-md text-label-md text-on-surface-variant text-right">
+                    ACCIONES
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-on-surface-variant text-body-md">
+                    <td
+                      colSpan={6}
+                      className="px-6 py-12 text-center text-on-surface-variant text-body-md"
+                    >
                       <div className="flex items-center justify-center gap-2">
                         <span className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
                         Cargando trabajadores...
                       </div>
                     </td>
                   </tr>
-                ) : filteredWorkers.map((worker) => (
-                  <tr key={worker.id || worker.dni} className="hover:bg-[#F4F6F8] transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-full bg-primary-fixed text-primary flex items-center justify-center font-bold mr-3">
-                          {worker.nombre.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()}
+                ) : (
+                  filteredWorkers.map((worker) => (
+                    <tr
+                      key={worker.id || worker.dni}
+                      className="hover:bg-[#F4F6F8] transition-colors group"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center">
+                          <div className="w-10 h-10 rounded-full bg-primary-fixed text-primary flex items-center justify-center font-bold mr-3">
+                            {worker.nombre
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .substring(0, 2)
+                              .toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-label-md text-label-md font-bold">{worker.nombre}</p>
+                            <p className="text-caption text-on-surface-variant">
+                              {worker.especialidad || "-"}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-label-md text-label-md font-bold">{worker.nombre}</p>
-                          <p className="text-caption text-on-surface-variant">{worker.especialidad || "-"}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 font-body-md text-body-md">{worker.dni}</td>
-                    <td className="px-6 py-4">
-                      <span className={`text-caption px-2 py-1 rounded font-medium ${
-                        worker.rol === "Interno" 
-                          ? "bg-surface-container-highest text-on-surface-variant" 
-                          : worker.rol === "Médico Externo"
-                          ? "bg-secondary-container text-on-secondary-container"
-                          : "bg-tertiary-fixed text-on-tertiary-fixed-variant"
-                      }`}>
-                        {worker.rol}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <p className="font-label-md text-label-md text-primary">{worker.comision_rate}%</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        worker.estado === "Activo" 
-                          ? "bg-green-100 text-green-800" 
-                          : "bg-error-container text-on-error-container"
-                      }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                          worker.estado === "Activo" ? "bg-green-500" : "bg-error"
-                        }`}></span>
-                        {worker.estado}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button 
-                        onClick={() => handleEditClick(worker)}
-                        className="text-on-surface-variant hover:text-primary transition-colors p-1 cursor-pointer"
-                      >
-                        <span className="material-symbols-outlined">edit</span>
-                      </button>
-                      <button 
-                        onClick={() => handleViewClick(worker)}
-                        className="text-on-surface-variant hover:text-primary transition-colors p-1 cursor-pointer"
-                      >
-                        <span className="material-symbols-outlined">visibility</span>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-6 py-4 font-body-md text-body-md">{worker.dni}</td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`text-caption px-2 py-1 rounded font-medium ${
+                            worker.rol === "Interno"
+                              ? "bg-surface-container-highest text-on-surface-variant"
+                              : worker.rol === "Médico Externo"
+                                ? "bg-secondary-container text-on-secondary-container"
+                                : "bg-tertiary-fixed text-on-tertiary-fixed-variant"
+                          }`}
+                        >
+                          {worker.rol}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <p className="font-label-md text-label-md text-primary">
+                          {worker.comision_rate}%
+                        </p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            worker.estado === "Activo"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-error-container text-on-error-container"
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                              worker.estado === "Activo" ? "bg-green-500" : "bg-error"
+                            }`}
+                          ></span>
+                          {worker.estado}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          onClick={() => handleEditClick(worker)}
+                          className="text-on-surface-variant hover:text-primary transition-colors p-1 cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined">edit</span>
+                        </button>
+                        <button
+                          onClick={() => handleViewClick(worker)}
+                          className="text-on-surface-variant hover:text-primary transition-colors p-1 cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined">visibility</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
                 {!isLoading && filteredWorkers.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-on-surface-variant text-body-md">
+                    <td
+                      colSpan={6}
+                      className="px-6 py-8 text-center text-on-surface-variant text-body-md"
+                    >
                       No se encontraron trabajadores que coincidan con los filtros aplicados.
                     </td>
                   </tr>
@@ -615,138 +709,197 @@ function TrabajadoresPage() {
         </div>
 
         {/* Traceability Insight Card */}
-        <div className="col-span-12 rounded-2xl overflow-hidden" style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)" }}>
+        <div
+          className="col-span-12 rounded-2xl overflow-hidden"
+          style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)" }}
+        >
           {/* Header */}
           <div className="px-6 pt-6 pb-4 flex items-start justify-between">
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <h4 className="font-title-lg text-white">Referenciadores Destacados</h4>
               </div>
-              <p className="text-[11px] text-slate-400">Trabajadores con mayor volumen de pacientes referidos · últimos 30 días</p>
+              <p className="text-[11px] text-slate-400">
+                Trabajadores con mayor volumen de pacientes referidos · últimos 30 días
+              </p>
             </div>
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,255,255,0.08)" }}>
-              <span className="material-symbols-outlined text-indigo-300 text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>insights</span>
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ background: "rgba(255,255,255,0.08)" }}
+            >
+              <span
+                className="material-symbols-outlined text-indigo-300 text-[22px]"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                insights
+              </span>
             </div>
           </div>
 
           <div className="px-6 pb-6">
-          {isFeaturedLoading ? (
-            <div className="py-10 text-center text-slate-400 text-body-md">
-              <span className="w-6 h-6 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin inline-block mr-2 align-middle"></span>
-              Cargando referenciadores...
-            </div>
-          ) : featuredReferrers.length === 0 ? (
-            <div className="py-8 flex flex-col items-center gap-3 text-center">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: "rgba(99,102,241,0.15)" }}>
-                <span className="material-symbols-outlined text-indigo-400 text-[28px]" style={{ fontVariationSettings: "'FILL' 0" }}>hub</span>
+            {isFeaturedLoading ? (
+              <div className="py-10 text-center text-slate-400 text-body-md">
+                <span className="w-6 h-6 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin inline-block mr-2 align-middle"></span>
+                Cargando referenciadores...
               </div>
-              <p className="text-white font-semibold text-sm">Sin referenciadores activos este mes</p>
-              <p className="text-slate-400 text-xs max-w-sm">
-                Aquí aparecerán los trabajadores con más pacientes referidos cuando los pacientes tengan el campo <code className="text-indigo-300 font-mono">referido_por_id</code> asignado.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {featuredReferrers.map((ref, idx) => {
-                const themes = [
-                  {
-                    medal: "🥇",
-                    cardGrad: "linear-gradient(135deg, #1d4ed8 0%, #4f46e5 100%)",
-                    glow: "0 0 24px rgba(99,102,241,0.4)",
-                    barGrad: "linear-gradient(90deg, #818cf8, #c7d2fe)",
-                    badgeBg: "rgba(255,255,255,0.15)",
-                    countColor: "#e0e7ff",
-                    labelColor: "#a5b4fc",
-                    rankBg: "rgba(255,215,0,0.2)",
-                    rankColor: "#fde047",
-                  },
-                  {
-                    medal: "🥈",
-                    cardGrad: "linear-gradient(135deg, #6d28d9 0%, #a855f7 100%)",
-                    glow: "0 0 24px rgba(168,85,247,0.35)",
-                    barGrad: "linear-gradient(90deg, #d8b4fe, #f3e8ff)",
-                    badgeBg: "rgba(255,255,255,0.15)",
-                    countColor: "#f3e8ff",
-                    labelColor: "#d8b4fe",
-                    rankBg: "rgba(200,200,220,0.2)",
-                    rankColor: "#e2e8f0",
-                  },
-                  {
-                    medal: "🥉",
-                    cardGrad: "linear-gradient(135deg, #065f46 0%, #059669 100%)",
-                    glow: "0 0 24px rgba(5,150,105,0.35)",
-                    barGrad: "linear-gradient(90deg, #6ee7b7, #d1fae5)",
-                    badgeBg: "rgba(255,255,255,0.15)",
-                    countColor: "#d1fae5",
-                    labelColor: "#6ee7b7",
-                    rankBg: "rgba(180,120,60,0.2)",
-                    rankColor: "#fbbf24",
-                  },
-                ];
-                const theme = themes[idx] || themes[2];
-                const maxCount = featuredReferrers[0].pacientesCount || 1;
-                const widthPercent = `${(ref.pacientesCount / maxCount) * 100}%`;
-                const initials = ref.nombre.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase();
-
-                return (
-                  <div
-                    key={ref.id}
-                    className="rounded-xl p-5 relative overflow-hidden flex flex-col gap-4"
-                    style={{ background: theme.cardGrad, boxShadow: theme.glow }}
+            ) : featuredReferrers.length === 0 ? (
+              <div className="py-8 flex flex-col items-center gap-3 text-center">
+                <div
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                  style={{ background: "rgba(99,102,241,0.15)" }}
+                >
+                  <span
+                    className="material-symbols-outlined text-indigo-400 text-[28px]"
+                    style={{ fontVariationSettings: "'FILL' 0" }}
                   >
-                    {/* Decorative blob */}
-                    <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full opacity-10" style={{ background: "white" }}></div>
+                    hub
+                  </span>
+                </div>
+                <p className="text-white font-semibold text-sm">
+                  Sin referenciadores activos este mes
+                </p>
+                <p className="text-slate-400 text-xs max-w-sm">
+                  Aquí aparecerán los trabajadores con más pacientes referidos cuando los pacientes
+                  tengan el campo <code className="text-indigo-300 font-mono">referido_por_id</code>{" "}
+                  asignado.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {featuredReferrers.map((ref, idx) => {
+                  const themes = [
+                    {
+                      medal: "🥇",
+                      cardGrad: "linear-gradient(135deg, #1d4ed8 0%, #4f46e5 100%)",
+                      glow: "0 0 24px rgba(99,102,241,0.4)",
+                      barGrad: "linear-gradient(90deg, #818cf8, #c7d2fe)",
+                      badgeBg: "rgba(255,255,255,0.15)",
+                      countColor: "#e0e7ff",
+                      labelColor: "#a5b4fc",
+                      rankBg: "rgba(255,215,0,0.2)",
+                      rankColor: "#fde047",
+                    },
+                    {
+                      medal: "🥈",
+                      cardGrad: "linear-gradient(135deg, #6d28d9 0%, #a855f7 100%)",
+                      glow: "0 0 24px rgba(168,85,247,0.35)",
+                      barGrad: "linear-gradient(90deg, #d8b4fe, #f3e8ff)",
+                      badgeBg: "rgba(255,255,255,0.15)",
+                      countColor: "#f3e8ff",
+                      labelColor: "#d8b4fe",
+                      rankBg: "rgba(200,200,220,0.2)",
+                      rankColor: "#e2e8f0",
+                    },
+                    {
+                      medal: "🥉",
+                      cardGrad: "linear-gradient(135deg, #065f46 0%, #059669 100%)",
+                      glow: "0 0 24px rgba(5,150,105,0.35)",
+                      barGrad: "linear-gradient(90deg, #6ee7b7, #d1fae5)",
+                      badgeBg: "rgba(255,255,255,0.15)",
+                      countColor: "#d1fae5",
+                      labelColor: "#6ee7b7",
+                      rankBg: "rgba(180,120,60,0.2)",
+                      rankColor: "#fbbf24",
+                    },
+                  ];
+                  const theme = themes[idx] || themes[2];
+                  const maxCount = featuredReferrers[0].pacientesCount || 1;
+                  const widthPercent = `${(ref.pacientesCount / maxCount) * 100}%`;
+                  const initials = ref.nombre
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .substring(0, 2)
+                    .toUpperCase();
 
-                    {/* Medal + rank */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl">{theme.medal}</span>
-                      <span
-                        className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                        style={{ background: theme.rankBg, color: theme.rankColor }}
-                      >
-                        #{idx + 1} RANKING
-                      </span>
-                    </div>
-
-                    {/* Avatar + name */}
-                    <div className="flex items-center gap-3">
+                  return (
+                    <div
+                      key={ref.id}
+                      className="rounded-xl p-5 relative overflow-hidden flex flex-col gap-4"
+                      style={{ background: theme.cardGrad, boxShadow: theme.glow }}
+                    >
+                      {/* Decorative blob */}
                       <div
-                        className="w-12 h-12 rounded-full flex items-center justify-center font-black text-white text-base flex-shrink-0 shadow-lg"
-                        style={{ background: theme.badgeBg, border: "2px solid rgba(255,255,255,0.3)" }}
-                      >
-                        {initials}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-bold text-white text-sm truncate leading-tight">{ref.nombre}</p>
-                        <span className="text-[10px] font-medium px-1.5 py-0.5 rounded mt-0.5 inline-block" style={{ background: "rgba(255,255,255,0.15)", color: theme.labelColor }}>
-                          {ref.rol}
+                        className="absolute -top-6 -right-6 w-24 h-24 rounded-full opacity-10"
+                        style={{ background: "white" }}
+                      ></div>
+
+                      {/* Medal + rank */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl">{theme.medal}</span>
+                        <span
+                          className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                          style={{ background: theme.rankBg, color: theme.rankColor }}
+                        >
+                          #{idx + 1} RANKING
                         </span>
                       </div>
-                    </div>
 
-                    {/* Count */}
-                    <div>
-                      <div className="flex items-end justify-between mb-2">
-                        <span className="text-[10px] font-medium" style={{ color: theme.labelColor }}>PACIENTES REFERIDOS</span>
-                        <span className="font-black text-3xl leading-none" style={{ color: theme.countColor }}>{ref.pacientesCount}</span>
-                      </div>
-                      {/* Animated bar */}
-                      <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.25)" }}>
+                      {/* Avatar + name */}
+                      <div className="flex items-center gap-3">
                         <div
-                          className="h-full rounded-full transition-all duration-1000"
-                          style={{ width: widthPercent, background: theme.barGrad }}
-                        ></div>
+                          className="w-12 h-12 rounded-full flex items-center justify-center font-black text-white text-base flex-shrink-0 shadow-lg"
+                          style={{
+                            background: theme.badgeBg,
+                            border: "2px solid rgba(255,255,255,0.3)",
+                          }}
+                        >
+                          {initials}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-bold text-white text-sm truncate leading-tight">
+                            {ref.nombre}
+                          </p>
+                          <span
+                            className="text-[10px] font-medium px-1.5 py-0.5 rounded mt-0.5 inline-block"
+                            style={{
+                              background: "rgba(255,255,255,0.15)",
+                              color: theme.labelColor,
+                            }}
+                          >
+                            {ref.rol}
+                          </span>
+                        </div>
                       </div>
-                    </div>
 
-                    {ref.especialidad && (
-                      <p className="text-[10px] truncate" style={{ color: theme.labelColor }}>📋 {ref.especialidad}</p>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                      {/* Count */}
+                      <div>
+                        <div className="flex items-end justify-between mb-2">
+                          <span
+                            className="text-[10px] font-medium"
+                            style={{ color: theme.labelColor }}
+                          >
+                            PACIENTES REFERIDOS
+                          </span>
+                          <span
+                            className="font-black text-3xl leading-none"
+                            style={{ color: theme.countColor }}
+                          >
+                            {ref.pacientesCount}
+                          </span>
+                        </div>
+                        {/* Animated bar */}
+                        <div
+                          className="w-full h-2.5 rounded-full overflow-hidden"
+                          style={{ background: "rgba(0,0,0,0.25)" }}
+                        >
+                          <div
+                            className="h-full rounded-full transition-all duration-1000"
+                            style={{ width: widthPercent, background: theme.barGrad }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      {ref.especialidad && (
+                        <p className="text-[10px] truncate" style={{ color: theme.labelColor }}>
+                          📋 {ref.especialidad}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -769,11 +922,11 @@ function TrabajadoresPage() {
               <span className="material-symbols-outlined">
                 {modalMode === "view" ? "visibility" : modalMode === "edit" ? "edit" : "person_add"}
               </span>
-              {modalMode === "view" 
-                ? "Detalles del Trabajador" 
-                : modalMode === "edit" 
-                ? "Editar Trabajador" 
-                : "Registrar Trabajador"}
+              {modalMode === "view"
+                ? "Detalles del Trabajador"
+                : modalMode === "edit"
+                  ? "Editar Trabajador"
+                  : "Registrar Trabajador"}
             </h3>
 
             {errorMsg && (

@@ -1,14 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { getTrabajadores, type DbTrabajador as Trabajador } from "../lib/api/workers";
-import { 
-  getComisiones, 
-  insertComision, 
-  updateComisionEstado, 
-  getPacientes, 
+import {
+  getComisiones,
+  insertComision,
+  updateComisionEstado,
+  getPacientes,
   deleteComision,
   type DbComision as Comision,
-  type DbPaciente as Paciente
+  type DbPaciente as Paciente,
 } from "../lib/api/comisiones";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -27,7 +27,7 @@ function Page() {
   const [comisiones, setComisiones] = useState<Comision[]>([]);
   const [trabajadores, setTrabajadores] = useState<Trabajador[]>([]);
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
-  
+
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -37,7 +37,9 @@ function Page() {
   const [filterMes, setFilterMes] = useState<string>("Todos");
 
   // Form State
-  const [tipoComisionista, setTipoComisionista] = useState<"Médico Especialista" | "Jaladora / Promotor">("Médico Especialista");
+  const [tipoComisionista, setTipoComisionista] = useState<
+    "Médico Especialista" | "Jaladora / Promotor"
+  >("Médico Especialista");
   const [trabajadorId, setTrabajadorId] = useState("");
   const [pacienteId, setPacienteId] = useState("");
   const [monto, setMonto] = useState("");
@@ -66,7 +68,7 @@ function Page() {
 
       setComisiones(comData);
       // Filter out inactive workers if any
-      setTrabajadores(workData.filter(w => w.estado === "Activo"));
+      setTrabajadores(workData.filter((w) => w.estado === "Activo"));
       setPacientes(pacData);
     } catch (err: any) {
       console.error("Error fetching data:", err);
@@ -114,15 +116,15 @@ function Page() {
           paciente_id: pacienteId,
           monto: parseFloat(monto),
           fecha_comision: fechaComision,
-          estado: "Pendiente"
-        }
+          estado: "Pendiente",
+        },
       });
 
       // Clear form except date
       setTrabajadorId("");
       setPacienteId("");
       setMonto("");
-      
+
       await fetchData();
     } catch (err: any) {
       console.error("Error inserting commission:", err);
@@ -141,7 +143,7 @@ function Page() {
         data: {
           id,
           estado: "Pagado",
-        }
+        },
       });
 
       await fetchData();
@@ -160,7 +162,7 @@ function Page() {
       await deleteComision({
         data: {
           id,
-        }
+        },
       });
 
       setComisionToDelete(null);
@@ -175,27 +177,25 @@ function Page() {
 
   // Calculations for Statistics using reduce
   const totalPendiente = comisiones
-    .filter(c => c.estado === "Pendiente")
+    .filter((c) => c.estado === "Pendiente")
     .reduce((acc, curr) => acc + Number(curr.monto), 0);
 
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
 
   const totalPagadoEsteMes = comisiones
-    .filter(c => {
+    .filter((c) => {
       if (c.estado !== "Pagado") return false;
       const [year, month] = c.fecha_comision.split("-").map(Number);
-      return year === currentYear && (month - 1) === currentMonth;
+      return year === currentYear && month - 1 === currentMonth;
     })
     .reduce((acc, curr) => acc + Number(curr.monto), 0);
 
   // Mini History of Paid Commissions
-  const ultimosPagos = comisiones
-    .filter(c => c.estado === "Pagado")
-    .slice(0, 3);
+  const ultimosPagos = comisiones.filter((c) => c.estado === "Pagado").slice(0, 3);
 
   // Workers filtered by type for selection
-  const filteredWorkersForForm = trabajadores.filter(w => {
+  const filteredWorkersForForm = trabajadores.filter((w) => {
     if (tipoComisionista === "Médico Especialista") {
       return w.rol === "Médico Externo" || w.rol === "Interno";
     } else {
@@ -206,24 +206,36 @@ function Page() {
   // Dynamic Month List for Filter
   const uniqueMonths = Array.from(
     new Set(
-      comisiones.map(c => {
+      comisiones.map((c) => {
         const [year, month] = c.fecha_comision.split("-");
         return `${year}-${month}`;
-      })
-    )
-  ).sort().reverse();
+      }),
+    ),
+  )
+    .sort()
+    .reverse();
 
   const formatMonthLabel = (yearMonthStr: string) => {
     const [year, month] = yearMonthStr.split("-").map(Number);
     const monthsSpanish = [
-      "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-      "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre",
     ];
     return `${monthsSpanish[month - 1]} ${year}`;
   };
 
   // Table Filters
-  const filteredComisiones = comisiones.filter(c => {
+  const filteredComisiones = comisiones.filter((c) => {
     const matchesEstado = filterEstado === "Todos" || c.estado === filterEstado;
     let matchesMonth = true;
     if (filterMes !== "Todos") {
@@ -238,7 +250,7 @@ function Page() {
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const paginatedComisiones = filteredComisiones.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   useEffect(() => {
@@ -252,7 +264,11 @@ function Page() {
     const pageW = doc.internal.pageSize.getWidth();
     const pageH = doc.internal.pageSize.getHeight();
     const now = new Date();
-    const dateStr = now.toLocaleDateString("es-PE", { year: "numeric", month: "long", day: "numeric" });
+    const dateStr = now.toLocaleDateString("es-PE", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
     const timeStr = now.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
 
     // Primary Header Bar
@@ -286,7 +302,11 @@ function Page() {
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(0, 66, 134);
-    doc.text(`$${totalPendiente.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 15, yStart + 14);
+    doc.text(
+      `$${totalPendiente.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      15,
+      yStart + 14,
+    );
 
     doc.setFillColor(243, 243, 250);
     doc.roundedRect(110, yStart, 90, 20, 2, 2, "F");
@@ -297,22 +317,34 @@ function Page() {
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(52, 103, 97);
-    doc.text(`$${totalPagadoEsteMes.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 115, yStart + 14);
+    doc.text(
+      `$${totalPagadoEsteMes.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      115,
+      yStart + 14,
+    );
 
     // Filter info block
     doc.setFontSize(8);
     doc.setFont("helvetica", "italic");
     doc.setTextColor(115, 119, 130);
     const filterInfo = `Estado: ${filterEstado} | Mes: ${filterMes === "Todos" ? "Todos" : formatMonthLabel(filterMes)}`;
-    doc.text(`Filtros aplicados: ${filterInfo} (${filteredComisiones.length} registros)`, 10, yStart + 27);
+    doc.text(
+      `Filtros aplicados: ${filterInfo} (${filteredComisiones.length} registros)`,
+      10,
+      yStart + 27,
+    );
 
     // Auto Table Layout
     autoTable(doc, {
       startY: yStart + 30,
       head: [["Comisionista", "Rol", "Paciente", "Monto", "Estado", "Fecha"]],
-      body: filteredComisiones.map(c => [
+      body: filteredComisiones.map((c) => [
         c.trabajadores?.nombre || "—",
-        c.trabajadores?.rol === "Médico Externo" ? "Médico" : c.trabajadores?.rol === "Jaladora" ? "Jaladora" : c.trabajadores?.rol || "—",
+        c.trabajadores?.rol === "Médico Externo"
+          ? "Médico"
+          : c.trabajadores?.rol === "Jaladora"
+            ? "Jaladora"
+            : c.trabajadores?.rol || "—",
         c.pacientes?.nombre || "—",
         `$${Number(c.monto).toFixed(2)}`,
         c.estado,
@@ -352,11 +384,15 @@ function Page() {
         {/* Header Section */}
         <div className="flex items-end justify-between">
           <div>
-            <h2 className="font-headline-md text-headline-md text-primary">Gestión de Comisiones</h2>
-            <p className="font-body-md text-body-md text-on-surface-variant">Registro y control de incentivos para médicos y jaladores.</p>
+            <h2 className="font-headline-md text-headline-md text-primary">
+              Gestión de Comisiones
+            </h2>
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              Registro y control de incentivos para médicos y jaladores.
+            </p>
           </div>
           <div className="flex gap-3">
-            <button 
+            <button
               onClick={handleExportPDF}
               disabled={filteredComisiones.length === 0}
               className="flex items-center gap-2 px-4 py-2 border border-outline text-primary rounded-lg font-label-md text-label-md hover:bg-surface-container transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
@@ -381,11 +417,13 @@ function Page() {
               <span className="material-symbols-outlined text-primary">add_circle</span>
               <h3 className="font-title-lg text-title-lg">Nueva Comisión</h3>
             </div>
-            
+
             <form onSubmit={handleRegisterComision} className="space-y-4">
               <div>
-                <label className="block font-label-md text-label-md text-outline mb-1">Tipo de Comisionista</label>
-                <select 
+                <label className="block font-label-md text-label-md text-outline mb-1">
+                  Tipo de Comisionista
+                </label>
+                <select
                   value={tipoComisionista}
                   onChange={(e) => setTipoComisionista(e.target.value as any)}
                   className="w-full border border-outline-variant rounded-lg p-2 text-body-md focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white"
@@ -396,7 +434,9 @@ function Page() {
               </div>
 
               <div>
-                <label className="block font-label-md text-label-md text-outline mb-1">Nombre del Comisionista</label>
+                <label className="block font-label-md text-label-md text-outline mb-1">
+                  Nombre del Comisionista
+                </label>
                 <select
                   value={trabajadorId}
                   onChange={(e) => setTrabajadorId(e.target.value)}
@@ -406,14 +446,22 @@ function Page() {
                   <option value="">Seleccione un comisionista...</option>
                   {filteredWorkersForForm.map((w) => (
                     <option key={w.id} value={w.id}>
-                      {w.nombre} ({w.rol === "Médico Externo" ? "Médico" : w.rol === "Jaladora" ? "Jaladora" : w.rol})
+                      {w.nombre} (
+                      {w.rol === "Médico Externo"
+                        ? "Médico"
+                        : w.rol === "Jaladora"
+                          ? "Jaladora"
+                          : w.rol}
+                      )
                     </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block font-label-md text-label-md text-outline mb-1">Paciente Atendido</label>
+                <label className="block font-label-md text-label-md text-outline mb-1">
+                  Paciente Atendido
+                </label>
                 <select
                   value={pacienteId}
                   onChange={(e) => setPacienteId(e.target.value)}
@@ -431,8 +479,10 @@ function Page() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-label-md text-label-md text-outline mb-1">Monto ($)</label>
-                  <input 
+                  <label className="block font-label-md text-label-md text-outline mb-1">
+                    Monto ($)
+                  </label>
+                  <input
                     type="number"
                     value={monto}
                     onChange={(e) => setMonto(e.target.value)}
@@ -444,8 +494,10 @@ function Page() {
                   />
                 </div>
                 <div>
-                  <label className="block font-label-md text-label-md text-outline mb-1">Fecha</label>
-                  <input 
+                  <label className="block font-label-md text-label-md text-outline mb-1">
+                    Fecha
+                  </label>
+                  <input
                     type="date"
                     value={fechaComision}
                     onChange={(e) => setFechaComision(e.target.value)}
@@ -455,7 +507,7 @@ function Page() {
                 </div>
               </div>
 
-              <button 
+              <button
                 type="submit"
                 disabled={submitting}
                 className="w-full bg-primary text-white py-3 rounded-lg font-label-md text-label-md hover:bg-primary-container transition-all shadow-sm active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
@@ -475,7 +527,7 @@ function Page() {
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   <span className="font-label-md text-label-md text-outline">Mes:</span>
-                  <select 
+                  <select
                     value={filterMes}
                     onChange={(e) => setFilterMes(e.target.value)}
                     className="border-none bg-surface-container-low rounded p-1 text-label-md font-medium text-on-surface-variant focus:ring-0 outline-none cursor-pointer"
@@ -488,35 +540,35 @@ function Page() {
                     ))}
                   </select>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <span className="font-label-md text-label-md text-outline">Estado:</span>
                   <div className="flex bg-surface-container-low rounded-lg p-1">
-                    <button 
+                    <button
                       onClick={() => setFilterEstado("Todos")}
                       className={`px-3 py-1 text-label-md cursor-pointer transition-all ${
-                        filterEstado === "Todos" 
-                          ? "bg-white rounded shadow-sm text-primary font-bold" 
+                        filterEstado === "Todos"
+                          ? "bg-white rounded shadow-sm text-primary font-bold"
                           : "text-on-surface-variant hover:bg-white/50"
                       }`}
                     >
                       Todos
                     </button>
-                    <button 
+                    <button
                       onClick={() => setFilterEstado("Pendiente")}
                       className={`px-3 py-1 text-label-md cursor-pointer transition-all ${
-                        filterEstado === "Pendiente" 
-                          ? "bg-white rounded shadow-sm text-primary font-bold" 
+                        filterEstado === "Pendiente"
+                          ? "bg-white rounded shadow-sm text-primary font-bold"
                           : "text-on-surface-variant hover:bg-white/50"
                       }`}
                     >
                       Pendientes
                     </button>
-                    <button 
+                    <button
                       onClick={() => setFilterEstado("Pagado")}
                       className={`px-3 py-1 text-label-md cursor-pointer transition-all ${
-                        filterEstado === "Pagado" 
-                          ? "bg-white rounded shadow-sm text-primary font-bold" 
+                        filterEstado === "Pagado"
+                          ? "bg-white rounded shadow-sm text-primary font-bold"
                           : "text-on-surface-variant hover:bg-white/50"
                       }`}
                     >
@@ -528,7 +580,9 @@ function Page() {
 
               <div className="flex items-center gap-2 text-outline">
                 <span className="material-symbols-outlined text-[20px]">filter_list</span>
-                <span className="font-label-md text-label-md uppercase tracking-wider">Filtros Avanzados</span>
+                <span className="font-label-md text-label-md uppercase tracking-wider">
+                  Filtros Avanzados
+                </span>
               </div>
             </div>
 
@@ -537,17 +591,30 @@ function Page() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-surface-container-low border-b border-outline-variant">
-                    <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant">Comisionista</th>
-                    <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant">Paciente</th>
-                    <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant">Monto</th>
-                    <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant">Estado</th>
-                    <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant text-right">Acciones</th>
+                    <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant">
+                      Comisionista
+                    </th>
+                    <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant">
+                      Paciente
+                    </th>
+                    <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant">
+                      Monto
+                    </th>
+                    <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant">
+                      Estado
+                    </th>
+                    <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant text-right">
+                      Acciones
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant">
                   {loading ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-on-surface-variant text-body-md">
+                      <td
+                        colSpan={5}
+                        className="px-6 py-12 text-center text-on-surface-variant text-body-md"
+                      >
                         <div className="flex items-center justify-center gap-2">
                           <span className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
                           Cargando comisiones...
@@ -556,30 +623,48 @@ function Page() {
                     </tr>
                   ) : paginatedComisiones.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-8 text-center text-on-surface-variant text-body-md">
+                      <td
+                        colSpan={5}
+                        className="px-6 py-8 text-center text-on-surface-variant text-body-md"
+                      >
                         No se encontraron registros de comisiones.
                       </td>
                     </tr>
                   ) : (
                     paginatedComisiones.map((com) => {
-                      const isMedico = com.trabajadores?.rol === "Médico Externo" || com.trabajadores?.rol === "Interno";
+                      const isMedico =
+                        com.trabajadores?.rol === "Médico Externo" ||
+                        com.trabajadores?.rol === "Interno";
                       return (
-                        <tr key={com.id} className="hover:bg-surface-container-low transition-colors group">
+                        <tr
+                          key={com.id}
+                          className="hover:bg-surface-container-low transition-colors group"
+                        >
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               {isMedico ? (
                                 <div className="w-8 h-8 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary">
-                                  <span className="material-symbols-outlined text-[18px]">medical_services</span>
+                                  <span className="material-symbols-outlined text-[18px]">
+                                    medical_services
+                                  </span>
                                 </div>
                               ) : (
                                 <div className="w-8 h-8 rounded-full bg-tertiary-fixed/20 flex items-center justify-center text-tertiary">
-                                  <span className="material-symbols-outlined text-[18px]">campaign</span>
+                                  <span className="material-symbols-outlined text-[18px]">
+                                    campaign
+                                  </span>
                                 </div>
                               )}
                               <div>
-                                <p className="font-body-md text-body-md font-semibold">{com.trabajadores?.nombre || "—"}</p>
+                                <p className="font-body-md text-body-md font-semibold">
+                                  {com.trabajadores?.nombre || "—"}
+                                </p>
                                 <p className="text-caption text-outline">
-                                  {com.trabajadores?.rol === "Médico Externo" ? "Médico" : com.trabajadores?.rol === "Jaladora" ? "Jaladora" : com.trabajadores?.rol || "—"}
+                                  {com.trabajadores?.rol === "Médico Externo"
+                                    ? "Médico"
+                                    : com.trabajadores?.rol === "Jaladora"
+                                      ? "Jaladora"
+                                      : com.trabajadores?.rol || "—"}
                                 </p>
                               </div>
                             </div>
@@ -601,7 +686,7 @@ function Page() {
                           </td>
                           <td className="px-6 py-4 text-right">
                             {com.estado === "Pendiente" ? (
-                              <button 
+                              <button
                                 onClick={() => handleMarcarPagada(com.id)}
                                 title="Liquidar comisión"
                                 className="text-outline hover:text-primary transition-colors cursor-pointer bg-transparent border-none p-1"
@@ -610,8 +695,10 @@ function Page() {
                               </button>
                             ) : (
                               <div className="relative inline-block text-left">
-                                <button 
-                                  onClick={() => setOpenDropdownId(openDropdownId === com.id ? null : com.id)}
+                                <button
+                                  onClick={() =>
+                                    setOpenDropdownId(openDropdownId === com.id ? null : com.id)
+                                  }
                                   title="Opciones"
                                   className="text-outline hover:text-primary hover:bg-surface-container transition-colors cursor-pointer bg-transparent border-none p-1 rounded-full flex items-center justify-center w-8 h-8"
                                 >
@@ -619,8 +706,8 @@ function Page() {
                                 </button>
                                 {openDropdownId === com.id && (
                                   <>
-                                    <div 
-                                      className="fixed inset-0 z-10" 
+                                    <div
+                                      className="fixed inset-0 z-10"
                                       onClick={() => setOpenDropdownId(null)}
                                     />
                                     <div className="absolute right-0 mt-1 w-44 rounded-lg bg-white border border-outline-variant shadow-lg py-1 z-20 origin-top-right">
@@ -632,7 +719,9 @@ function Page() {
                                         }}
                                         className="w-full text-left px-4 py-2 font-label-md text-label-md text-error hover:bg-error-container/20 flex items-center gap-2 cursor-pointer border-none bg-white transition-colors"
                                       >
-                                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                                        <span className="material-symbols-outlined text-[18px]">
+                                          delete
+                                        </span>
                                         Eliminar comisión
                                       </button>
                                     </div>
@@ -655,28 +744,28 @@ function Page() {
                 </p>
                 {totalPages > 1 && (
                   <div className="flex gap-1">
-                    <button 
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                       disabled={currentPage === 1}
                       className="w-8 h-8 flex items-center justify-center border border-outline-variant bg-white rounded hover:bg-surface-container transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span className="material-symbols-outlined text-[18px]">chevron_left</span>
                     </button>
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                      <button 
+                      <button
                         key={p}
                         onClick={() => setCurrentPage(p)}
                         className={`w-8 h-8 flex items-center justify-center border rounded text-caption font-bold cursor-pointer transition-all ${
-                          currentPage === p 
-                            ? "border-primary bg-primary text-white" 
+                          currentPage === p
+                            ? "border-primary bg-primary text-white"
                             : "border-outline-variant bg-white text-outline hover:bg-surface-container"
                         }`}
                       >
                         {p}
                       </button>
                     ))}
-                    <button 
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                       disabled={currentPage === totalPages}
                       className="w-8 h-8 flex items-center justify-center border border-outline-variant bg-white rounded hover:bg-surface-container transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -694,22 +783,38 @@ function Page() {
               {/* Quick Stats */}
               <div className="bg-primary text-white p-stack_lg flex items-center justify-between shadow-sm overflow-hidden relative rounded-lg">
                 <div className="z-10">
-                  <p className="font-label-md text-label-md opacity-80 uppercase tracking-widest">Total Pendiente</p>
+                  <p className="font-label-md text-label-md opacity-80 uppercase tracking-widest">
+                    Total Pendiente
+                  </p>
                   <p className="text-display-lg font-display-lg mt-1">
-                    ${totalPendiente.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    $
+                    {totalPendiente.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </p>
                 </div>
-                <span className="material-symbols-outlined text-[80px] absolute -right-4 -bottom-4 opacity-10 font-normal">account_balance_wallet</span>
+                <span className="material-symbols-outlined text-[80px] absolute -right-4 -bottom-4 opacity-10 font-normal">
+                  account_balance_wallet
+                </span>
               </div>
-              
+
               <div className="bg-secondary text-white p-stack_lg flex items-center justify-between shadow-sm overflow-hidden relative rounded-lg">
                 <div className="z-10">
-                  <p className="font-label-md text-label-md opacity-80 uppercase tracking-widest">Pagado este Mes</p>
+                  <p className="font-label-md text-label-md opacity-80 uppercase tracking-widest">
+                    Pagado este Mes
+                  </p>
                   <p className="text-display-lg font-display-lg mt-1">
-                    ${totalPagadoEsteMes.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    $
+                    {totalPagadoEsteMes.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </p>
                 </div>
-                <span className="material-symbols-outlined text-[80px] absolute -right-4 -bottom-4 opacity-10 font-normal">task_alt</span>
+                <span className="material-symbols-outlined text-[80px] absolute -right-4 -bottom-4 opacity-10 font-normal">
+                  task_alt
+                </span>
               </div>
 
               {/* Mini History Card */}
@@ -720,10 +825,15 @@ function Page() {
                 </h4>
                 <div className="space-y-4 flex-1">
                   {ultimosPagos.length === 0 ? (
-                    <p className="text-caption text-outline py-4">No hay pagos registrados este mes.</p>
+                    <p className="text-caption text-outline py-4">
+                      No hay pagos registrados este mes.
+                    </p>
                   ) : (
                     ultimosPagos.map((c) => (
-                      <div key={c.id} className="flex items-center gap-3 border-l-2 border-secondary pl-3">
+                      <div
+                        key={c.id}
+                        className="flex items-center gap-3 border-l-2 border-secondary pl-3"
+                      >
                         <div className="flex-1">
                           <p className="font-body-md text-body-md font-semibold">
                             {c.movimientos?.metodo || "Transferencia"}: {c.trabajadores?.nombre}
@@ -739,7 +849,7 @@ function Page() {
                     ))
                   )}
                 </div>
-                <button 
+                <button
                   onClick={() => {
                     setFilterEstado("Pagado");
                     setFilterMes("Todos");
@@ -753,16 +863,16 @@ function Page() {
           </div>
         </div>
       </div>
-      
+
       {/* Deletion Confirmation Modal */}
       {comisionToDelete && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center transition-all">
           {/* Backdrop click to close */}
-          <div 
-            className="absolute inset-0" 
+          <div
+            className="absolute inset-0"
             onClick={() => !deleting && setComisionToDelete(null)}
           />
-          
+
           {/* Modal Body */}
           <div className="bg-white rounded-xl shadow-xl max-w-sm w-full mx-4 p-6 relative border border-outline-variant z-10">
             <div className="flex items-start gap-4">
@@ -772,11 +882,12 @@ function Page() {
               <div className="space-y-2 flex-1">
                 <h3 className="font-title-lg text-title-lg text-on-surface">¿Eliminar Comisión?</h3>
                 <p className="font-body-md text-body-md text-on-surface-variant">
-                  Esta acción es irreversible y eliminará el registro de la comisión de forma permanente de la base de datos.
+                  Esta acción es irreversible y eliminará el registro de la comisión de forma
+                  permanente de la base de datos.
                 </p>
               </div>
             </div>
-            
+
             <div className="mt-6 flex justify-end gap-3">
               <button
                 type="button"

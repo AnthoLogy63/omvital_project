@@ -51,11 +51,13 @@ try {
       apikey: supabaseKey,
     },
   });
-  
+
   if (response.ok) {
     console.log(`✅ Conexión HTTP exitosa. Status: ${response.status} ${response.statusText}`);
   } else {
-    console.warn(`⚠️ Respuesta del servidor REST: ${response.status} ${response.statusText} (Acceso directo restringido)`);
+    console.warn(
+      `⚠️ Respuesta del servidor REST: ${response.status} ${response.statusText} (Acceso directo restringido)`,
+    );
   }
 } catch (err) {
   console.error("❌ Falló la conexión HTTP directa:", err);
@@ -90,7 +92,9 @@ console.log("\n=== Fin de la prueba de conexión ===");
 Se ejecutaron tres escenarios de pruebas que validan la conexión y el comportamiento de la seguridad a nivel de filas (RLS):
 
 ### Escenario A: Consulta Anónima (RLS Activo)
+
 Dado que RLS está habilitado y la política requiere un usuario autenticado (`TO authenticated`), la consulta anon devuelve un éxito HTTP 200, pero filtra las filas a un conjunto vacío:
+
 ```text
 === OMVITAL Supabase Connection Test ===
 URL: https://pudsbrahsvpwtpecalcj.supabase.co
@@ -111,7 +115,9 @@ Datos obtenidos: []
 ```
 
 ### Escenario B: Prueba con Datos y Política Temporal (Verificación de Lectura)
+
 Se insertó un trabajador de prueba vía SQL de manera interna, y se aplicó una política temporal para permitir la lectura a usuarios anónimos (`TO anon USING (true)`). El script leyó con éxito el registro, demostrando que la API de Supabase procesa las consultas correctamente:
+
 ```text
 3. Intentando consultar tabla 'trabajadores'...
 ✅ Consulta a 'trabajadores' completada. Status HTTP: 200
@@ -126,6 +132,7 @@ Datos obtenidos: [
 ```
 
 ### Escenario C: Limpieza y Restauración de Seguridad
+
 Se borraron el registro de prueba y la política temporal. El comportamiento retornó a la normalidad (HTTP 200, 0 registros devueltos para usuarios anónimos), garantizando la seguridad del entorno.
 
 ---
@@ -133,10 +140,13 @@ Se borraron el registro de prueba y la política temporal. El comportamiento ret
 ## 4. Guía de Uso para el Desarrollador
 
 ### A. Estructura de Clientes Supabase en el Proyecto
+
 Para utilizar Supabase en el código de OMVITAL, se deben seguir los siguientes patrones según el entorno:
 
 #### 1. Cliente en el Frontend (Lado del Cliente - React)
+
 Para realizar consultas directas desde componentes o hooks del cliente:
+
 ```typescript
 import { createClient } from "@supabase/supabase-js";
 
@@ -147,7 +157,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 ```
 
 #### 2. Cliente en Server Functions (Lado del Servidor SSR - Nitro)
+
 Para ejecutar operaciones seguras que requieran permisos de administrador (bypassing RLS si fuera necesario con la key `SERVICE_ROLE` guardada en el servidor):
+
 ```typescript
 import { createClient } from "@supabase/supabase-js";
 import { getServerConfig } from "../config.server";
@@ -157,12 +169,13 @@ export function getSupabaseServerClient() {
   // Se inicializa en cada petición del servidor para evitar fugas de memoria
   return createClient(
     process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY! // Llave secreta exclusiva de servidor
+    process.env.SUPABASE_SERVICE_ROLE_KEY!, // Llave secreta exclusiva de servidor
   );
 }
 ```
 
 ### B. Ejemplo de CRUD en Server Functions (`src/lib/api/`)
+
 A continuación se muestra un ejemplo de cómo crear una Server Function con TanStack Start usando Supabase:
 
 ```typescript
@@ -175,12 +188,12 @@ export const getPacientes = createServerFn({ method: "GET" })
   .inputValidator(z.object({ limit: z.number().optional() }))
   .handler(async ({ data }) => {
     const supabase = getSupabaseServerClient();
-    
+
     const { data: pacientes, error } = await supabase
       .from("pacientes")
       .select("*")
       .limit(data.limit ?? 10);
-      
+
     if (error) throw new Error(error.message);
     return pacientes;
   });

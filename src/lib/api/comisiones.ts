@@ -34,11 +34,12 @@ export interface DbPaciente {
 }
 
 // 1. Fetch comisiones joining trabajadores, pacientes, and movements
-export const getComisiones = createServerFn({ method: "GET" })
-  .handler(async (): Promise<DbComision[]> => {
+export const getComisiones = createServerFn({ method: "GET" }).handler(
+  async (): Promise<DbComision[]> => {
     const { data, error } = await supabase
       .from("comisiones")
-      .select(`
+      .select(
+        `
         id,
         trabajador_id,
         paciente_id,
@@ -62,7 +63,8 @@ export const getComisiones = createServerFn({ method: "GET" })
           metodo,
           created_at
         )
-      `)
+      `,
+      )
       .order("fecha_comision", { ascending: false });
 
     if (error) {
@@ -71,7 +73,8 @@ export const getComisiones = createServerFn({ method: "GET" })
     }
 
     return (data || []) as any as DbComision[];
-  });
+  },
+);
 
 // 2. Insert commission
 export const insertComision = createServerFn({ method: "POST" })
@@ -82,7 +85,7 @@ export const insertComision = createServerFn({ method: "POST" })
       monto: z.number().positive("El monto debe ser positivo"),
       fecha_comision: z.string(),
       estado: z.enum(["Pendiente", "Pagado"]).default("Pendiente"),
-    })
+    }),
   )
   .handler(async ({ data: input }): Promise<DbComision> => {
     const { data, error } = await supabase
@@ -94,7 +97,7 @@ export const insertComision = createServerFn({ method: "POST" })
           monto: input.monto,
           fecha_comision: input.fecha_comision,
           estado: input.estado,
-        }
+        },
       ])
       .select()
       .single();
@@ -113,7 +116,7 @@ export const updateComisionEstado = createServerFn({ method: "POST" })
     z.object({
       id: z.string().uuid(),
       estado: z.enum(["Pendiente", "Pagado"]),
-    })
+    }),
   )
   .handler(async ({ data: input }) => {
     const { data, error } = await supabase
@@ -134,8 +137,8 @@ export const updateComisionEstado = createServerFn({ method: "POST" })
   });
 
 // 4. Fetch patient list
-export const getPacientes = createServerFn({ method: "GET" })
-  .handler(async (): Promise<DbPaciente[]> => {
+export const getPacientes = createServerFn({ method: "GET" }).handler(
+  async (): Promise<DbPaciente[]> => {
     const { data, error } = await supabase
       .from("pacientes")
       .select("id, nombre")
@@ -147,20 +150,18 @@ export const getPacientes = createServerFn({ method: "GET" })
     }
 
     return (data || []) as DbPaciente[];
-  });
+  },
+);
 
 // 5. Delete commission
 export const deleteComision = createServerFn({ method: "POST" })
   .validator(
     z.object({
       id: z.string().uuid("ID de comisión inválido"),
-    })
+    }),
   )
   .handler(async ({ data: input }) => {
-    const { error } = await supabase
-      .from("comisiones")
-      .delete()
-      .eq("id", input.id);
+    const { error } = await supabase.from("comisiones").delete().eq("id", input.id);
 
     if (error) {
       console.error("Error deleting commission from Supabase:", error);
@@ -169,4 +170,3 @@ export const deleteComision = createServerFn({ method: "POST" })
 
     return { success: true };
   });
-
