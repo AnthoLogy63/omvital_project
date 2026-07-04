@@ -72,7 +72,7 @@ export const getComisiones = createServerFn({ method: "GET" }).handler(
       throw new Error(error.message);
     }
 
-    return (data || []) as any as DbComision[];
+    return (data || []) as unknown as DbComision[];
   },
 );
 

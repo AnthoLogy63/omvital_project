@@ -64,7 +64,7 @@ function TrabajadoresPage() {
 
         setWorkers(workersData);
         setFeaturedReferrers(featuredData);
-      } catch (err: any) {
+      } catch (err) {
         console.error("Error loading data:", err);
         setErrorMsg("No se pudieron cargar los datos de la base de datos.");
       } finally {
@@ -194,9 +194,10 @@ function TrabajadoresPage() {
       // Reload featured referrers
       const updatedFeatured = await getReferenciadoresDestacados();
       setFeaturedReferrers(updatedFeatured);
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as Error;
       console.error("Error saving worker:", err);
-      setErrorMsg(err.message || "Error al guardar el trabajador en Supabase.");
+      setErrorMsg(error.message || "Error al guardar el trabajador en Supabase.");
     } finally {
       setIsSubmitting(false);
     }
@@ -390,7 +391,9 @@ function TrabajadoresPage() {
     });
 
     // ── Footer ────────────────────────────────────────────────────────────
-    const totalPages = (doc as any).internal.getNumberOfPages();
+    const totalPages = (
+      doc as unknown as { internal: { getNumberOfPages: () => number } }
+    ).internal.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
       doc.setFillColor(241, 245, 249);
@@ -549,7 +552,11 @@ function TrabajadoresPage() {
                 </label>
                 <select
                   value={filterRol}
-                  onChange={(e) => setFilterRol(e.target.value as any)}
+                  onChange={(e) =>
+                    setFilterRol(
+                      e.target.value as "Todos" | "Interno" | "Médico Externo" | "Jaladora",
+                    )
+                  }
                   className="w-full border border-outline-variant rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-white transition-all text-body-md font-body-md"
                 >
                   <option value="Todos">Todos los roles</option>
@@ -564,7 +571,9 @@ function TrabajadoresPage() {
                 </label>
                 <select
                   value={filterEstado}
-                  onChange={(e) => setFilterEstado(e.target.value as any)}
+                  onChange={(e) =>
+                    setFilterEstado(e.target.value as "Todos" | "Activo" | "Inactivo")
+                  }
                   className="w-full border border-outline-variant rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-white transition-all text-body-md font-body-md"
                 >
                   <option value="Todos">Todos los estados</option>

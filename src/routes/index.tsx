@@ -1,6 +1,30 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { getDashboardData } from "../lib/api/dashboard";
 
+interface DashboardMovement {
+  id: string;
+  created_at: string;
+  concepto: string;
+  categoria?: string | null;
+  tipo: string;
+  monto: number;
+  estado: string;
+}
+
+interface DashboardDebt {
+  id: string;
+  paciente?: { nombre: string } | null;
+  paquete?: { nombre: string; cantidad_sesiones: number } | null;
+  sesiones_realizadas: number;
+  deuda: number;
+}
+
+interface DashboardCommission {
+  id: string;
+  trabajador?: { nombre: string } | null;
+  monto: number;
+}
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -40,7 +64,18 @@ function getCategoryColor(cat: string) {
 }
 
 function DashboardPage() {
-  const { stats, movements, debts, commissions } = Route.useLoaderData();
+  const { stats, movements, debts, commissions } = Route.useLoaderData() as {
+    stats: {
+      ingresos: number;
+      egresos: number;
+      saldo: number;
+      pendingCount: number;
+      isCajaOpen: boolean;
+    };
+    movements: DashboardMovement[];
+    debts: DashboardDebt[];
+    commissions: DashboardCommission[];
+  };
 
   return (
     <main className="pt-[64px] pl-[260px] h-screen overflow-y-auto relative">
@@ -186,7 +221,7 @@ function DashboardPage() {
                       </td>
                     </tr>
                   ) : (
-                    movements.map((mov: any) => (
+                    movements.map((mov) => (
                       <tr key={mov.id} className="hover:bg-[#F4F6F8] transition-colors">
                         <td className="px-6 py-4 font-body-md text-body-md">
                           {new Date(mov.created_at).toLocaleTimeString([], {
@@ -245,7 +280,7 @@ function DashboardPage() {
                     No hay deudas pendientes.
                   </p>
                 ) : (
-                  debts.map((deuda: any) => {
+                  debts.map((deuda) => {
                     const sesionesPendientes =
                       deuda.paquete?.cantidad_sesiones - deuda.sesiones_realizadas;
                     return (
@@ -288,7 +323,7 @@ function DashboardPage() {
                     No hay comisiones pendientes.
                   </p>
                 ) : (
-                  commissions.map((comision: any) => {
+                  commissions.map((comision) => {
                     const nombre = comision.trabajador?.nombre || "Desconocido";
                     // Fake progress bar logic just to show visual feedback (using random or fixed % wouldn't be accurate, let's just make it 50% or remove it)
                     // For now, let's keep it to 100% since it's a pending amount

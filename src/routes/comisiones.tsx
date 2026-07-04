@@ -70,7 +70,7 @@ function Page() {
       // Filter out inactive workers if any
       setTrabajadores(workData.filter((w) => w.estado === "Activo"));
       setPacientes(pacData);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error fetching data:", err);
       setErrorMsg("Ocurrió un error al consultar los datos de la base de datos.");
     } finally {
@@ -126,9 +126,10 @@ function Page() {
       setMonto("");
 
       await fetchData();
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as Error;
       console.error("Error inserting commission:", err);
-      setErrorMsg(err.message || "Error al registrar la comisión.");
+      setErrorMsg(error.message || "Error al registrar la comisión.");
     } finally {
       setSubmitting(false);
     }
@@ -147,9 +148,10 @@ function Page() {
       });
 
       await fetchData();
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as Error;
       console.error("Error updating commission state:", err);
-      setErrorMsg(err.message || "Error al actualizar el estado de la comisión.");
+      setErrorMsg(error.message || "Error al actualizar el estado de la comisión.");
       setLoading(false);
     }
   };
@@ -167,9 +169,10 @@ function Page() {
 
       setComisionToDelete(null);
       await fetchData();
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as Error;
       console.error("Error deleting commission:", err);
-      setErrorMsg(err.message || "Error al eliminar la comisión.");
+      setErrorMsg(error.message || "Error al eliminar la comisión.");
     } finally {
       setDeleting(false);
     }
@@ -366,7 +369,9 @@ function Page() {
       margin: { left: 10, right: 10 },
     });
 
-    const totalPagesNum = (doc as any).internal.getNumberOfPages();
+    const totalPagesNum = (
+      doc as unknown as { internal: { getNumberOfPages: () => number } }
+    ).internal.getNumberOfPages();
     for (let i = 1; i <= totalPagesNum; i++) {
       doc.setPage(i);
       doc.setFontSize(7);
@@ -425,7 +430,11 @@ function Page() {
                 </label>
                 <select
                   value={tipoComisionista}
-                  onChange={(e) => setTipoComisionista(e.target.value as any)}
+                  onChange={(e) =>
+                    setTipoComisionista(
+                      e.target.value as "Médico Especialista" | "Jaladora / Promotor",
+                    )
+                  }
                   className="w-full border border-outline-variant rounded-lg p-2 text-body-md focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white"
                 >
                   <option value="Médico Especialista">Médico Especialista</option>
