@@ -13,6 +13,7 @@ import { Route as TrabajadoresRouteImport } from './routes/trabajadores'
 import { Route as ReportesRouteImport } from './routes/reportes'
 import { Route as PaquetesRouteImport } from './routes/paquetes'
 import { Route as MovimientosRouteImport } from './routes/movimientos'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ComisionesRouteImport } from './routes/comisiones'
 import { Route as CajaRouteImport } from './routes/caja'
 import { Route as IndexRouteImport } from './routes/index'
@@ -37,6 +38,11 @@ const MovimientosRoute = MovimientosRouteImport.update({
   path: '/movimientos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ComisionesRoute = ComisionesRouteImport.update({
   id: '/comisiones',
   path: '/comisiones',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/caja': typeof CajaRoute
   '/comisiones': typeof ComisionesRoute
+  '/login': typeof LoginRoute
   '/movimientos': typeof MovimientosRoute
   '/paquetes': typeof PaquetesRoute
   '/reportes': typeof ReportesRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/caja': typeof CajaRoute
   '/comisiones': typeof ComisionesRoute
+  '/login': typeof LoginRoute
   '/movimientos': typeof MovimientosRoute
   '/paquetes': typeof PaquetesRoute
   '/reportes': typeof ReportesRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/caja': typeof CajaRoute
   '/comisiones': typeof ComisionesRoute
+  '/login': typeof LoginRoute
   '/movimientos': typeof MovimientosRoute
   '/paquetes': typeof PaquetesRoute
   '/reportes': typeof ReportesRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/caja'
     | '/comisiones'
+    | '/login'
     | '/movimientos'
     | '/paquetes'
     | '/reportes'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/caja'
     | '/comisiones'
+    | '/login'
     | '/movimientos'
     | '/paquetes'
     | '/reportes'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/caja'
     | '/comisiones'
+    | '/login'
     | '/movimientos'
     | '/paquetes'
     | '/reportes'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CajaRoute: typeof CajaRoute
   ComisionesRoute: typeof ComisionesRoute
+  LoginRoute: typeof LoginRoute
   MovimientosRoute: typeof MovimientosRoute
   PaquetesRoute: typeof PaquetesRoute
   ReportesRoute: typeof ReportesRoute
@@ -151,6 +164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MovimientosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/comisiones': {
       id: '/comisiones'
       path: '/comisiones'
@@ -179,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CajaRoute: CajaRoute,
   ComisionesRoute: ComisionesRoute,
+  LoginRoute: LoginRoute,
   MovimientosRoute: MovimientosRoute,
   PaquetesRoute: PaquetesRoute,
   ReportesRoute: ReportesRoute,
