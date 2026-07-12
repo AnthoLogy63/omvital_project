@@ -19,7 +19,7 @@ const html = `<main class="ml-[260px] flex flex-col min-h-screen">
 </button>
 <div class="flex items-center gap-3 pl-4 border-l border-outline-variant">
 <div class="text-right">
-<p class="font-label-md text-label-md font-bold">Dr. Armando Casas</p>
+<p class="font-label-md text-label-md font-bold">William Nuñez</p>
 <p class="text-caption text-outline">Administrador</p>
 </div>
 <img alt="Administrador" class="w-10 h-10 rounded-full object-cover border border-outline-variant" data-alt="A professional headshot of a mature male medical administrator with a kind expression, wearing a clinical white coat and a stethoscope. The background is a blurred high-end medical facility with soft sober blue lighting, creating an atmosphere of trust, precision, and institutional stability in line with a clinical design system." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVLQ1qx35BHja_IaMLxutb85WKkfEfGlbHl_brTVcm-3q1Yl4KWZFwwNyvyj0xs7APVWPgr1zajrs0nB56mNFxy-clAUXnPiMIdvnkpjz8VwBWHB9JZBOH4FgrnWULe1ph6SvIU-dNMQJCGjXJmB0t0_KjcLBd22mm7NRGgbPBeMPWDBMTu9L9w6EMOFsP9wfqNMTm8s0hav38KgHwS97KCIclYw5N4wU4_qHoT4nApOmq3kSqfB8PQg9_LHrcvr5ZkGljPYTJUxU">

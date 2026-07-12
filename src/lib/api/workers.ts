@@ -23,8 +23,8 @@ export interface ReferenciadorDestacado {
 }
 
 // 1. Fetch workers
-export const getTrabajadores = createServerFn({ method: "GET" })
-  .handler(async (): Promise<DbTrabajador[]> => {
+export const getTrabajadores = createServerFn({ method: "GET" }).handler(
+  async (): Promise<DbTrabajador[]> => {
     const { data, error } = await supabase
       .from("trabajadores")
       .select("*")
@@ -36,7 +36,8 @@ export const getTrabajadores = createServerFn({ method: "GET" })
     }
 
     return (data || []) as DbTrabajador[];
-  });
+  },
+);
 
 // 2. Register worker
 export const insertTrabajador = createServerFn({ method: "POST" })
@@ -48,7 +49,7 @@ export const insertTrabajador = createServerFn({ method: "POST" })
       especialidad: z.string().optional().nullable(),
       comision_rate: z.number().default(0),
       estado: z.enum(["Activo", "Inactivo"]).default("Activo"),
-    })
+    }),
   )
   .handler(async ({ data: input }): Promise<DbTrabajador> => {
     const { data, error } = await supabase
@@ -85,7 +86,7 @@ export const updateTrabajador = createServerFn({ method: "POST" })
       especialidad: z.string().optional().nullable(),
       comision_rate: z.number().default(0),
       estado: z.enum(["Activo", "Inactivo"]).default("Activo"),
-    })
+    }),
   )
   .handler(async ({ data: input }): Promise<DbTrabajador> => {
     const { data, error } = await supabase
@@ -111,8 +112,8 @@ export const updateTrabajador = createServerFn({ method: "POST" })
   });
 
 // 4. Get featured referrers based on referred patient volume in last 30 days
-export const getReferenciadoresDestacados = createServerFn({ method: "GET" })
-  .handler(async (): Promise<ReferenciadorDestacado[]> => {
+export const getReferenciadoresDestacados = createServerFn({ method: "GET" }).handler(
+  async (): Promise<ReferenciadorDestacado[]> => {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -160,4 +161,5 @@ export const getReferenciadoresDestacados = createServerFn({ method: "GET" })
       .slice(0, 3);
 
     return featured;
-  });
+  },
+);
