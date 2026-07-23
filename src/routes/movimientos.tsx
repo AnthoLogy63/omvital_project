@@ -591,6 +591,8 @@ function MovimientosPage() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-150">
                         <button 
+                          type="button"
+                          aria-label="Ver detalles"
                           onClick={() => handleViewClick(m)}
                           className="text-outline hover:text-primary transition-all p-1 cursor-pointer"
                           title="Ver detalles"
@@ -598,6 +600,8 @@ function MovimientosPage() {
                           <span className="material-symbols-outlined text-[20px]">visibility</span>
                         </button>
                         <button 
+                          type="button"
+                          aria-label="Editar"
                           onClick={() => handleEditClick(m)}
                           className="text-outline hover:text-primary transition-all p-1 cursor-pointer"
                           title="Editar"
@@ -605,6 +609,8 @@ function MovimientosPage() {
                           <span className="material-symbols-outlined text-[20px]">edit</span>
                         </button>
                         <button 
+                          type="button"
+                          aria-label="Eliminar"
                           onClick={() => handleDeleteClick(m)}
                           className="text-outline hover:text-error transition-all p-1 cursor-pointer"
                           title="Eliminar"
