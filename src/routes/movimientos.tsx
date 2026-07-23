@@ -239,16 +239,19 @@ function MovimientosPage() {
       m.estado
     ]);
 
-    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" 
-      + [headers.join(","), ...rows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))].join("\n");
-    
-    const encodedUri = encodeURI(csvContent);
+    const csvText =
+      [headers.join(","), ...rows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))].join("\n");
+
+    const blob = new Blob([`\uFEFF${csvText}`], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `reporte_movimientos_omvital_${new Date().toISOString().split("T")[0]}.csv`);
+    link.href = url;
+    link.download = `reporte_movimientos_omvital_${new Date().toISOString().split("T")[0]}.csv`;
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    link.remove();
+    URL.revokeObjectURL(url);
   };
 
   // Helper date conversions
