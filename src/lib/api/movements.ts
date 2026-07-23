@@ -184,7 +184,7 @@ export const getLatestCajaCierre = createServerFn({ method: "GET" })
 
     if (error) {
       console.error("Error fetching latest caja closure:", error);
-      return null;
+      throw new Error(error.message);
     }
 
     return data;
