@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.SUPABASE_URL;
 // Use service role key to bypass RLS and view all data
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
