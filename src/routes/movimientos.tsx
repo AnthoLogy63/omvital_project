@@ -30,7 +30,7 @@ function MovimientosPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [filterTipo, setFilterTipo] = useState<"Todos" | "Ingreso" | "Egreso">("Todos");
-  const [filterOrigen, setFilterOrigen] = useState<"Todos" | "Caja" | "Paquete" | "Comisión">("Todos");
+  const [filterOrigen, setFilterOrigen] = useState<"Todos" | "Caja" | "Paquete" | "Comisión" | "Gasto Operativo" | "Nómina" | "Otros">("Todos");
   const [filterMetodo, setFilterMetodo] = useState<"Todos" | "Efectivo" | "Transferencia" | "Tarjeta" | "Yape" | "Plin">("Todos");
 
   // Modal State
