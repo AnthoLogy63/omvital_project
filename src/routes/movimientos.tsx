@@ -391,7 +391,7 @@ function MovimientosPage() {
           </div>
         </div>
         <div className="flex items-center gap-6">
-          <button className="relative text-on-surface-variant hover:text-primary transition-all cursor-pointer active:opacity-70">
+          <button type="button" aria-label="Notificaciones" className="relative text-on-surface-variant hover:text-primary transition-all cursor-pointer active:opacity-70">
             <span className="material-symbols-outlined">notifications</span>
             <span className="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
           </button>
