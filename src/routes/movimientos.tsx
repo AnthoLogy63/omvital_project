@@ -9,6 +9,7 @@ import {
   type DbMovimiento 
 } from "../lib/api/movements";
 
+
 export const Route = createFileRoute("/movimientos")({
   head: () => ({
     meta: [

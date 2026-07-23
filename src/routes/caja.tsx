@@ -225,10 +225,7 @@ const html = `<main class="ml-[260px] pt-[64px] min-h-screen">
 
 export const Route = createFileRoute("/caja")({
   head: () => ({
-    meta: [
-      { title: "OMVITAL - Caja" },
-      { name: "description", content: "Control de caja" },
-    ],
+    meta: [{ title: "OMVITAL - Caja" }, { name: "description", content: "Control de caja" }],
   }),
   component: Page,
 });

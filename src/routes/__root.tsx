@@ -7,6 +7,7 @@ import {
   useRouterState,
   HeadContent,
   Scripts,
+  redirect,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
@@ -68,7 +69,9 @@ function NotFoundComponent() {
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold">404</h1>
         <p className="mt-2 text-sm text-on-surface-variant">Página no encontrada.</p>
-        <Link to="/" className="mt-6 inline-flex rounded-lg bg-primary px-4 py-2 text-white">Ir al inicio</Link>
+        <Link to="/" className="mt-6 inline-flex rounded-lg bg-primary px-4 py-2 text-white">
+          Ir al inicio
+        </Link>
       </div>
     </div>
   );
@@ -77,14 +80,26 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => { reportLovableError(error, { boundary: "tanstack_root_error_component" }); }, [error]);
+  useEffect(() => {
+    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+  }, [error]);
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold">Algo salió mal</h1>
         <div className="mt-6 flex justify-center gap-2">
-          <button onClick={() => { router.invalidate(); reset(); }} className="rounded-lg bg-primary px-4 py-2 text-white">Reintentar</button>
-          <a href="/" className="rounded-lg border px-4 py-2">Inicio</a>
+          <button
+            onClick={() => {
+              router.invalidate();
+              reset();
+            }}
+            className="rounded-lg bg-primary px-4 py-2 text-white"
+          >
+            Reintentar
+          </button>
+          <a href="/" className="rounded-lg border px-4 py-2">
+            Inicio
+          </a>
         </div>
       </div>
     </div>
@@ -92,6 +107,23 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  beforeLoad: async ({ location }) => {
+    // Si la persona intenta ir a login se permite sin trabas
+    if (location.pathname === '/login') return
+
+    const { supabase } = await import('../lib/supabase')
+    const { data } = await supabase.auth.getSession()
+
+    // Si no hay una sesión activa, se manda a la pantalla de login
+    if (!data.session) {
+      throw redirect({
+        to: '/login',
+        search: {
+          redirect: location.href,
+        },
+      })
+    }
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -102,15 +134,29 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:title", content: "OMVITAL" },
       { property: "og:description", content: "OMVITAL - Sistema de Clínica Financiera" },
       { name: "twitter:description", content: "OMVITAL - Sistema de Clínica Financiera" },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1dc316db-caf2-4f19-b331-8f3c749ca3cd/id-preview-a6ec819b--54484d19-c8ce-4240-82eb-4b2ac16f78bd.lovable.app-1781454030134.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1dc316db-caf2-4f19-b331-8f3c749ca3cd/id-preview-a6ec819b--54484d19-c8ce-4240-82eb-4b2ac16f78bd.lovable.app-1781454030134.png" },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1dc316db-caf2-4f19-b331-8f3c749ca3cd/id-preview-a6ec819b--54484d19-c8ce-4240-82eb-4b2ac16f78bd.lovable.app-1781454030134.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1dc316db-caf2-4f19-b331-8f3c749ca3cd/id-preview-a6ec819b--54484d19-c8ce-4240-82eb-4b2ac16f78bd.lovable.app-1781454030134.png",
+      },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap",
+      },
     ],
     scripts: [
       { src: "https://cdn.tailwindcss.com?plugins=forms,container-queries" },
@@ -149,6 +195,7 @@ const NAV = [
 
 function Sidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const router = useRouter();
   return (
     <aside className="fixed left-0 top-0 h-full w-[260px] border-r border-primary flex flex-col z-50 overflow-y-auto bg-primary-container">
       <div className="px-6 py-8">
@@ -175,14 +222,25 @@ function Sidebar() {
         })}
       </nav>
       <div className="px-2 py-4 border-t border-primary">
-        <a className="flex items-center px-4 py-3 hover:bg-white/10 transition-colors duration-200 text-white" href="#">
+        <a
+          className="flex items-center px-4 py-3 hover:bg-white/10 transition-colors duration-200 text-white"
+          href="#"
+        >
           <span className="material-symbols-outlined mr-3">settings</span>
           <span className="font-label-md text-label-md">Configuración</span>
         </a>
-        <a className="flex items-center px-4 py-3 hover:bg-white/10 transition-colors duration-200 text-white" href="#">
+        <button
+          onClick={async () => {
+            const { supabase } = await import('../lib/supabase')
+            await supabase.auth.signOut()
+            router.navigate({ to: '/login' })
+            router.invalidate()
+          }}
+          className="w-full flex items-center px-4 py-3 hover:bg-white/10 transition-colors duration-200 text-white cursor-pointer text-left"
+        >
           <span className="material-symbols-outlined mr-3">logout</span>
           <span className="font-label-md text-label-md">Cerrar Sesión</span>
-        </a>
+        </button>
       </div>
     </aside>
   );
@@ -193,8 +251,14 @@ function TopBar() {
     <header className="fixed top-0 right-0 h-[64px] w-[calc(100%-260px)] bg-surface/90 backdrop-blur-sm border-b border-outline-variant flex items-center justify-between px-8 z-40">
       <div className="flex items-center flex-1 max-w-xl">
         <div className="relative w-full">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-          <input className="w-full bg-surface-container-low border border-outline-variant rounded-lg py-1.5 pl-10 pr-4 focus:ring-1 focus:ring-primary focus:border-primary outline-none text-body-md transition-all" placeholder="Buscar pacientes, transacciones..." type="text" />
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">
+            search
+          </span>
+          <input
+            className="w-full bg-surface-container-low border border-outline-variant rounded-lg py-1.5 pl-10 pr-4 focus:ring-1 focus:ring-primary focus:border-primary outline-none text-body-md transition-all"
+            placeholder="Buscar pacientes, transacciones..."
+            type="text"
+          />
         </div>
       </div>
       <div className="flex items-center gap-6">
@@ -210,10 +274,14 @@ function TopBar() {
         <div className="h-8 w-px bg-outline-variant"></div>
         <div className="flex items-center gap-3 cursor-pointer group">
           <div className="text-right hidden sm:block">
-            <p className="font-label-md text-label-md text-on-surface font-bold">Dr. Armando Casas</p>
+            <p className="font-label-md text-label-md text-on-surface font-bold">William Nuñez</p>
             <p className="font-caption text-caption text-on-surface-variant">Administrador</p>
           </div>
-          <img alt="Administrador" className="w-10 h-10 rounded-full border border-outline-variant object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGxGuSpawvtWTnaiZRbsoO_InEitpMxLx1P5w9HDNHPOvwcIP164yS2o01mm6nsnFp4BS3rshBIxjSnt8ZUQJmuq6cCddwz6whmVKRzEpaGxd8UhcraEcsLK99K0snM25Qys2N3ONvCTEXg_i7PH483mnhvAO4S4ATJe4nZPLjPKkmgYqXVNabrW_FwcAzzb8hI908jhLmYEoHsN4CNF0taUIaygoHWvnZlnEvcxeB2mXV7HBme8MG2h4Hm69ZuX4Z9B8CBZe-5cE" />
+          <img
+            alt="Administrador"
+            className="w-10 h-10 rounded-full border border-outline-variant object-cover"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGxGuSpawvtWTnaiZRbsoO_InEitpMxLx1P5w9HDNHPOvwcIP164yS2o01mm6nsnFp4BS3rshBIxjSnt8ZUQJmuq6cCddwz6whmVKRzEpaGxd8UhcraEcsLK99K0snM25Qys2N3ONvCTEXg_i7PH483mnhvAO4S4ATJe4nZPLjPKkmgYqXVNabrW_FwcAzzb8hI908jhLmYEoHsN4CNF0taUIaygoHWvnZlnEvcxeB2mXV7HBme8MG2h4Hm69ZuX4Z9B8CBZe-5cE"
+          />
         </div>
       </div>
     </header>
@@ -222,11 +290,27 @@ function TopBar() {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  // Evaluamos la ruta actual del sistema
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isLoginPage = pathname === '/login';
+
   return (
     <QueryClientProvider client={queryClient}>
-      <Sidebar />
-      <TopBar />
-      <Outlet />
+      {isLoginPage ? (
+        // Si está en el login, renderiza el contenido limpio sin barras laterales ni superiores
+        <main className="w-full min-h-screen bg-background overflow-y-auto">
+          <Outlet />
+        </main>
+      ) : (
+        // Si es cualquier otra página, mantiene el Layout con Sidebar y TopBar para tus compañeros
+        <>
+          <Sidebar />
+          <TopBar />
+          <main className="pl-[260px] pt-[64px] h-screen overflow-y-auto bg-background">
+            <Outlet />
+          </main>
+        </>
+      )}
     </QueryClientProvider>
   );
 }
