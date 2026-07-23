@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { 
-  getMovements, 
-  insertMovement, 
-  updateMovement, 
-  deleteMovement, 
-  getLatestCajaCierre, 
-  type DbMovimiento 
+import {
+  getMovements,
+  insertMovement,
+  updateMovement,
+  deleteMovement,
+  getLatestCajaCierre,
+  type DbMovimiento
 } from "../lib/api/movements";
 
 
@@ -226,7 +226,7 @@ function MovimientosPage() {
   // Export filtered movements list to CSV
   const handleExportCSV = () => {
     if (filteredMovements.length === 0) return;
-    
+
     const headers = ["Fecha", "Hora", "Origen/Categoría", "Tipo", "Método", "Monto", "Concepto", "Nota", "Estado"];
     const rows = filteredMovements.map(m => [
       formatDate(m.created_at),
@@ -308,7 +308,7 @@ function MovimientosPage() {
       const diffMins = Math.floor(diffMs / (1000 * 60));
       const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
       const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-      
+
       if (diffMins < 60) return `Hace ${diffMins} min`;
       if (diffHours < 24) return `Hace ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
       return `Hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
@@ -382,9 +382,9 @@ function MovimientosPage() {
         <div className="flex items-center gap-4 flex-1">
           <div className="relative w-full max-w-md">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-            <input 
-              className="w-full bg-surface-container border border-outline-variant rounded px-10 py-2 text-body-md focus:outline-none focus:border-primary transition-all" 
-              placeholder="Buscar movimientos..." 
+            <input
+              className="w-full bg-surface-container border border-outline-variant rounded px-10 py-2 text-body-md focus:outline-none focus:border-primary transition-all"
+              placeholder="Buscar movimientos..."
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -404,9 +404,9 @@ function MovimientosPage() {
               <p className="font-label-md text-label-md font-bold">Dr. Armando Casas</p>
               <p className="text-caption text-outline">Administrador</p>
             </div>
-            <img 
-              alt="Administrador" 
-              className="w-10 h-10 rounded-full object-cover border border-outline-variant" 
+            <img
+              alt="Administrador"
+              className="w-10 h-10 rounded-full object-cover border border-outline-variant"
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVLQ1qx35BHja_IaMLxutb85WKkfEfGlbHl_brTVcm-3q1Yl4KWZFwwNyvyj0xs7APVWPgr1zajrs0nB56mNFxy-clAUXnPiMIdvnkpjz8VwBWHB9JZBOH4FgrnWULe1ph6SvIU-dNMQJCGjXJmB0t0_KjcLBd22mm7NRGgbPBeMPWDBMTu9L9w6EMOFsP9wfqNMTm8s0hav38KgHwS97KCIclYw5N4wU4_qHoT4nApOmq3kSqfB8PQg9_LHrcvr5ZkGljPYTJUxU"
             />
           </div>
@@ -422,7 +422,7 @@ function MovimientosPage() {
             <p className="text-body-md text-on-surface-variant">Libro contable centralizado de la clínica.</p>
           </div>
           <div className="flex gap-2">
-            <button 
+            <button
               onClick={handleExportCSV}
               disabled={filteredMovements.length === 0}
               className="flex items-center gap-2 px-4 py-2 border border-outline-variant bg-white text-primary rounded font-label-md hover:bg-surface-container-low transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
@@ -430,7 +430,7 @@ function MovimientosPage() {
               <span className="material-symbols-outlined text-[20px]">download</span>
               Exportar CSV
             </button>
-            <button 
+            <button
               onClick={handleCreateClick}
               className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded font-label-md hover:bg-primary-container transition-all cursor-pointer"
             >
@@ -474,9 +474,9 @@ function MovimientosPage() {
             <label className="font-label-md text-on-surface-variant">Rango de Fecha</label>
             <div className="flex items-center gap-2 border border-outline-variant rounded px-3 py-1.5 focus-within:border-primary transition-all bg-white">
               <span className="material-symbols-outlined text-[18px] text-outline">calendar_today</span>
-              <input 
-                className="text-body-md focus:outline-none bg-transparent" 
-                placeholder="Ej: 16 jun 2026" 
+              <input
+                className="text-body-md focus:outline-none bg-transparent"
+                placeholder="Ej: 16 jun 2026"
                 type="text"
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
@@ -485,7 +485,7 @@ function MovimientosPage() {
           </div>
           <div className="flex flex-col gap-1">
             <label className="font-label-md text-on-surface-variant">Tipo</label>
-            <select 
+            <select
               className="border border-outline-variant rounded px-3 py-2 text-body-md focus:outline-none focus:border-primary transition-all min-w-[140px] bg-white cursor-pointer"
               value={filterTipo}
               onChange={(e) => setFilterTipo(e.target.value as any)}
@@ -497,7 +497,7 @@ function MovimientosPage() {
           </div>
           <div className="flex flex-col gap-1">
             <label className="font-label-md text-on-surface-variant">Origen</label>
-            <select 
+            <select
               className="border border-outline-variant rounded px-3 py-2 text-body-md focus:outline-none focus:border-primary transition-all min-w-[140px] bg-white cursor-pointer"
               value={filterOrigen}
               onChange={(e) => setFilterOrigen(e.target.value as any)}
@@ -509,10 +509,11 @@ function MovimientosPage() {
               <option value="Gasto Operativo">Gasto Operativo</option>
               <option value="Nómina">Nómina</option>
               <option value="Otros">Otros</option>
+            </select>
           </div>
           <div className="flex flex-col gap-1">
             <label className="font-label-md text-on-surface-variant">Método</label>
-            <select 
+            <select
               className="border border-outline-variant rounded px-3 py-2 text-body-md focus:outline-none focus:border-primary transition-all min-w-[140px] bg-white cursor-pointer"
               value={filterMetodo}
               onChange={(e) => setFilterMetodo(e.target.value as any)}
@@ -526,7 +527,7 @@ function MovimientosPage() {
             </select>
           </div>
           <div className="mt-auto pb-1 pl-2">
-            <button 
+            <button
               onClick={handleClearFilters}
               className="text-primary hover:underline font-label-md flex items-center gap-1 cursor-pointer"
             >
@@ -575,23 +576,21 @@ function MovimientosPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-caption font-bold ${
-                        m.tipo === "Ingreso" 
-                          ? "bg-secondary/10 text-secondary" 
+                      <span className={`px-3 py-1 rounded-full text-caption font-bold ${m.tipo === "Ingreso"
+                          ? "bg-secondary/10 text-secondary"
                           : "bg-error/10 text-error"
-                      }`}>
+                        }`}>
                         {m.tipo.toUpperCase()}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-body-md">{m.metodo}</td>
-                    <td className={`px-6 py-4 text-body-md text-right font-bold ${
-                      m.tipo === "Ingreso" ? "text-on-surface" : "text-error"
-                    }`}>
+                    <td className={`px-6 py-4 text-body-md text-right font-bold ${m.tipo === "Ingreso" ? "text-on-surface" : "text-error"
+                      }`}>
                       {m.tipo === "Ingreso" ? "+" : "-"}${Number(m.monto).toFixed(2)}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-150">
-                        <button 
+                        <button
                           type="button"
                           aria-label="Ver detalles"
                           onClick={() => handleViewClick(m)}
@@ -600,7 +599,7 @@ function MovimientosPage() {
                         >
                           <span className="material-symbols-outlined text-[20px]">visibility</span>
                         </button>
-                        <button 
+                        <button
                           type="button"
                           aria-label="Editar"
                           onClick={() => handleEditClick(m)}
@@ -609,7 +608,7 @@ function MovimientosPage() {
                         >
                           <span className="material-symbols-outlined text-[20px]">edit</span>
                         </button>
-                        <button 
+                        <button
                           type="button"
                           aria-label="Eliminar"
                           onClick={() => handleDeleteClick(m)}
@@ -639,7 +638,7 @@ function MovimientosPage() {
               Mostrando {totalItems > 0 ? startIndex + 1 : 0} a {endIndex} de {totalItems} movimientos
             </p>
             <div className="flex items-center gap-2">
-              <button 
+              <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1 || isLoading}
                 className="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-outline hover:border-primary hover:text-primary transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
@@ -651,16 +650,15 @@ function MovimientosPage() {
                   key={page}
                   onClick={() => setCurrentPage(page)}
                   disabled={isLoading}
-                  className={`w-8 h-8 flex items-center justify-center rounded font-label-md cursor-pointer ${
-                    currentPage === page
+                  className={`w-8 h-8 flex items-center justify-center rounded font-label-md cursor-pointer ${currentPage === page
                       ? "bg-primary text-white"
                       : "border border-outline-variant text-outline hover:border-primary hover:text-primary transition-all"
-                  }`}
+                    }`}
                 >
                   {page}
                 </button>
               ))}
-              <button 
+              <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages || isLoading}
                 className="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-outline hover:border-primary hover:text-primary transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
@@ -730,11 +728,11 @@ function MovimientosPage() {
               <span className="material-symbols-outlined">
                 {modalMode === "view" ? "visibility" : modalMode === "edit" ? "edit" : "add_box"}
               </span>
-              {modalMode === "view" 
-                ? "Detalles del Movimiento" 
-                : modalMode === "edit" 
-                ? "Editar Movimiento" 
-                : "Nuevo Registro Contable"}
+              {modalMode === "view"
+                ? "Detalles del Movimiento"
+                : modalMode === "edit"
+                  ? "Editar Movimiento"
+                  : "Nuevo Registro Contable"}
             </h3>
 
             {errorMsg && (
