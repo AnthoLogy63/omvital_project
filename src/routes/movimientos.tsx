@@ -332,7 +332,10 @@ function MovimientosPage() {
 
     const matchesTipo = filterTipo === "Todos" || m.tipo === filterTipo;
 
-    const matchesOrigen = filterOrigen === "Todos" || m.categoria === filterOrigen;
+    const matchesOrigen =
+      filterOrigen === "Todos" ||
+      (m.categoria ?? "").toLowerCase().includes(filterOrigen.toLowerCase()) ||
+      (filterOrigen === "Comisión" && (m.categoria ?? "").toLowerCase().includes("comision"));
 
     const matchesMetodo = filterMetodo === "Todos" || m.metodo === filterMetodo;
 
