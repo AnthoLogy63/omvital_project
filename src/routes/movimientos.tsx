@@ -499,7 +499,9 @@ function MovimientosPage() {
               <option value="Caja">Caja</option>
               <option value="Paquete">Paquete</option>
               <option value="Comisión">Comisión</option>
-            </select>
+              <option value="Gasto Operativo">Gasto Operativo</option>
+              <option value="Nómina">Nómina</option>
+              <option value="Otros">Otros</option>
           </div>
           <div className="flex flex-col gap-1">
             <label className="font-label-md text-on-surface-variant">Método</label>
