@@ -6,9 +6,8 @@ import {
   updateMovement,
   deleteMovement,
   getLatestCajaCierre,
-  type DbMovimiento
+  type DbMovimiento,
 } from "../lib/api/movements";
-
 
 export const Route = createFileRoute("/movimientos")({
   head: () => ({
@@ -22,7 +21,9 @@ export const Route = createFileRoute("/movimientos")({
 
 function MovimientosPage() {
   const [movements, setMovements] = useState<DbMovimiento[]>([]);
-  const [latestCajaCierre, setLatestCajaCierre] = useState<{ fecha_cierre: string | null } | null>(null);
+  const [latestCajaCierre, setLatestCajaCierre] = useState<{ fecha_cierre: string | null } | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -31,8 +32,12 @@ function MovimientosPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [filterTipo, setFilterTipo] = useState<"Todos" | "Ingreso" | "Egreso">("Todos");
-  const [filterOrigen, setFilterOrigen] = useState<"Todos" | "Caja" | "Paquete" | "Comisión" | "Gasto Operativo" | "Nómina" | "Otros">("Todos");
-  const [filterMetodo, setFilterMetodo] = useState<"Todos" | "Efectivo" | "Transferencia" | "Tarjeta" | "Yape" | "Plin">("Todos");
+  const [filterOrigen, setFilterOrigen] = useState<
+    "Todos" | "Caja" | "Paquete" | "Comisión" | "Gasto Operativo" | "Nómina" | "Otros"
+  >("Todos");
+  const [filterMetodo, setFilterMetodo] = useState<
+    "Todos" | "Efectivo" | "Transferencia" | "Tarjeta" | "Yape" | "Plin"
+  >("Todos");
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,13 +64,10 @@ function MovimientosPage() {
     async function loadData() {
       try {
         setIsLoading(true);
-        const [movsData, closureData] = await Promise.all([
-          getMovements(),
-          getLatestCajaCierre(),
-        ]);
+        const [movsData, closureData] = await Promise.all([getMovements(), getLatestCajaCierre()]);
         setMovements(movsData);
         setLatestCajaCierre(closureData);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error loading movements:", err);
         setErrorMsg("No se pudieron cargar los movimientos de la base de datos.");
       } finally {
@@ -81,7 +83,9 @@ function MovimientosPage() {
   }, [searchQuery, dateFilter, filterTipo, filterOrigen, filterMetodo]);
 
   // Form input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -143,9 +147,9 @@ function MovimientosPage() {
         setIsSubmitting(true);
         await deleteMovement({ data: { id: m.id } });
         setMovements((prev) => prev.filter((item) => item.id !== m.id));
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error deleting movement:", err);
-        alert(err.message || "Error al eliminar el movimiento.");
+        alert(err instanceof Error ? err.message : "Error al eliminar el movimiento.");
       } finally {
         setIsSubmitting(false);
       }
@@ -189,7 +193,9 @@ function MovimientosPage() {
           },
         });
 
-        setMovements((prev) => prev.map((item) => (item.id === selectedMovement.id ? updated : item)));
+        setMovements((prev) =>
+          prev.map((item) => (item.id === selectedMovement.id ? updated : item)),
+        );
       } else {
         const created = await insertMovement({
           data: {
@@ -207,9 +213,11 @@ function MovimientosPage() {
       }
 
       setIsModalOpen(false);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error saving movement:", err);
-      setErrorMsg(err.message || "Error al guardar el movimiento en Supabase.");
+      setErrorMsg(
+        err instanceof Error ? err.message : "Error al guardar el movimiento en Supabase.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -227,8 +235,18 @@ function MovimientosPage() {
   const handleExportCSV = () => {
     if (filteredMovements.length === 0) return;
 
-    const headers = ["Fecha", "Hora", "Origen/Categoría", "Tipo", "Método", "Monto", "Concepto", "Nota", "Estado"];
-    const rows = filteredMovements.map(m => [
+    const headers = [
+      "Fecha",
+      "Hora",
+      "Origen/Categoría",
+      "Tipo",
+      "Método",
+      "Monto",
+      "Concepto",
+      "Nota",
+      "Estado",
+    ];
+    const rows = filteredMovements.map((m) => [
       formatDate(m.created_at),
       formatTime(m.created_at),
       m.categoria || "—",
@@ -237,11 +255,13 @@ function MovimientosPage() {
       m.monto,
       m.concepto,
       m.nota || "",
-      m.estado
+      m.estado,
     ]);
 
-    const csvText =
-      [headers.join(","), ...rows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))].join("\n");
+    const csvText = [
+      headers.join(","),
+      ...rows.map((e) => e.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(",")),
+    ].join("\n");
 
     const blob = new Blob([`\uFEFF${csvText}`], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -292,10 +312,7 @@ function MovimientosPage() {
     try {
       const date = new Date(dateStr);
       const today = new Date();
-      return (
-        date.getMonth() === today.getMonth() &&
-        date.getFullYear() === today.getFullYear()
-      );
+      return date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
     } catch {
       return false;
     }
@@ -310,8 +327,8 @@ function MovimientosPage() {
       const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
       if (diffMins < 60) return `Hace ${diffMins} min`;
-      if (diffHours < 24) return `Hace ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
-      return `Hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
+      if (diffHours < 24) return `Hace ${diffHours} hora${diffHours > 1 ? "s" : ""}`;
+      return `Hace ${diffDays} día${diffDays > 1 ? "s" : ""}`;
     } catch {
       return "No registrado";
     }
@@ -366,7 +383,8 @@ function MovimientosPage() {
     .filter((m) => m.tipo === "Ingreso" && isThisMonth(m.created_at))
     .reduce((sum, m) => sum + Number(m.monto), 0);
   const metaRecaudacion = 190000;
-  const metaPorcentaje = metaRecaudacion > 0 ? Math.min(100, Math.round((volumenMensual / metaRecaudacion) * 100)) : 0;
+  const metaPorcentaje =
+    metaRecaudacion > 0 ? Math.min(100, Math.round((volumenMensual / metaRecaudacion) * 100)) : 0;
 
   // Pagination
   const totalItems = filteredMovements.length;
@@ -382,7 +400,9 @@ function MovimientosPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="font-headline-md text-headline-md text-primary">Movimientos</h2>
-            <p className="text-body-md text-on-surface-variant">Libro contable centralizado de la clínica.</p>
+            <p className="text-body-md text-on-surface-variant">
+              Libro contable centralizado de la clínica.
+            </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
             <div className="relative w-full sm:w-64">
@@ -421,7 +441,9 @@ function MovimientosPage() {
             <p className="text-label-md text-outline mb-1 uppercase tracking-wider">Ingresos Hoy</p>
             <div className="flex items-baseline gap-2">
               <span className="text-headline-md text-on-surface">
-                {isLoading ? "..." : `$${ingresosHoy.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                {isLoading
+                  ? "..."
+                  : `$${ingresosHoy.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
               </span>
             </div>
           </div>
@@ -429,15 +451,21 @@ function MovimientosPage() {
             <p className="text-label-md text-outline mb-1 uppercase tracking-wider">Egresos Hoy</p>
             <div className="flex items-baseline gap-2">
               <span className="text-headline-md text-on-surface">
-                {isLoading ? "..." : `$${egresosHoy.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                {isLoading
+                  ? "..."
+                  : `$${egresosHoy.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
               </span>
             </div>
           </div>
           <div className="bg-white border border-outline-variant p-stack_lg rounded-lg">
             <p className="text-label-md text-outline mb-1 uppercase tracking-wider">Balance Neto</p>
             <div className="flex items-baseline gap-2">
-              <span className={`text-headline-md font-bold ${balanceNeto >= 0 ? "text-primary" : "text-error"}`}>
-                {isLoading ? "..." : `$${balanceNeto.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+              <span
+                className={`text-headline-md font-bold ${balanceNeto >= 0 ? "text-primary" : "text-error"}`}
+              >
+                {isLoading
+                  ? "..."
+                  : `$${balanceNeto.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
               </span>
             </div>
           </div>
@@ -448,7 +476,9 @@ function MovimientosPage() {
           <div className="flex flex-col gap-1">
             <label className="font-label-md text-on-surface-variant">Rango de Fecha</label>
             <div className="flex items-center gap-2 border border-outline-variant rounded px-3 py-1.5 focus-within:border-primary transition-all bg-white">
-              <span className="material-symbols-outlined text-[18px] text-outline">calendar_today</span>
+              <span className="material-symbols-outlined text-[18px] text-outline">
+                calendar_today
+              </span>
               <input
                 className="text-body-md focus:outline-none bg-transparent"
                 placeholder="Ej: 16 jun 2026"
@@ -463,7 +493,7 @@ function MovimientosPage() {
             <select
               className="border border-outline-variant rounded px-3 py-2 text-body-md focus:outline-none focus:border-primary transition-all min-w-[140px] bg-white cursor-pointer"
               value={filterTipo}
-              onChange={(e) => setFilterTipo(e.target.value as any)}
+              onChange={(e) => setFilterTipo(e.target.value as "Todos" | "Ingreso" | "Egreso")}
             >
               <option value="Todos">Todos</option>
               <option value="Ingreso">Ingreso</option>
@@ -475,7 +505,18 @@ function MovimientosPage() {
             <select
               className="border border-outline-variant rounded px-3 py-2 text-body-md focus:outline-none focus:border-primary transition-all min-w-[140px] bg-white cursor-pointer"
               value={filterOrigen}
-              onChange={(e) => setFilterOrigen(e.target.value as any)}
+              onChange={(e) =>
+                setFilterOrigen(
+                  e.target.value as
+                    | "Todos"
+                    | "Caja"
+                    | "Paquete"
+                    | "Comisión"
+                    | "Gasto Operativo"
+                    | "Nómina"
+                    | "Otros",
+                )
+              }
             >
               <option value="Todos">Todos</option>
               <option value="Caja">Caja</option>
@@ -491,7 +532,17 @@ function MovimientosPage() {
             <select
               className="border border-outline-variant rounded px-3 py-2 text-body-md focus:outline-none focus:border-primary transition-all min-w-[140px] bg-white cursor-pointer"
               value={filterMetodo}
-              onChange={(e) => setFilterMetodo(e.target.value as any)}
+              onChange={(e) =>
+                setFilterMetodo(
+                  e.target.value as
+                    | "Todos"
+                    | "Efectivo"
+                    | "Transferencia"
+                    | "Tarjeta"
+                    | "Yape"
+                    | "Plin",
+                )
+              }
             >
               <option value="Todos">Todos</option>
               <option value="Efectivo">Efectivo</option>
@@ -518,87 +569,115 @@ function MovimientosPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#F8FAFB] border-b border-outline-variant">
-                  <th className="px-6 py-4 font-label-md text-outline uppercase tracking-wider">Fecha &amp; Hora</th>
-                  <th className="px-6 py-4 font-label-md text-outline uppercase tracking-wider">Origen</th>
-                  <th className="px-6 py-4 font-label-md text-outline uppercase tracking-wider">Tipo</th>
-                  <th className="px-6 py-4 font-label-md text-outline uppercase tracking-wider">Método</th>
-                  <th className="px-6 py-4 font-label-md text-outline uppercase tracking-wider text-right">Monto</th>
-                  <th className="px-6 py-4 font-label-md text-outline uppercase tracking-wider text-right">Acciones</th>
+                  <th className="px-6 py-4 font-label-md text-outline uppercase tracking-wider">
+                    Fecha &amp; Hora
+                  </th>
+                  <th className="px-6 py-4 font-label-md text-outline uppercase tracking-wider">
+                    Origen
+                  </th>
+                  <th className="px-6 py-4 font-label-md text-outline uppercase tracking-wider">
+                    Tipo
+                  </th>
+                  <th className="px-6 py-4 font-label-md text-outline uppercase tracking-wider">
+                    Método
+                  </th>
+                  <th className="px-6 py-4 font-label-md text-outline uppercase tracking-wider text-right">
+                    Monto
+                  </th>
+                  <th className="px-6 py-4 font-label-md text-outline uppercase tracking-wider text-right">
+                    Acciones
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-on-surface-variant text-body-md">
+                    <td
+                      colSpan={6}
+                      className="px-6 py-12 text-center text-on-surface-variant text-body-md"
+                    >
                       <div className="flex items-center justify-center gap-2">
                         <span className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
                         Cargando movimientos contables...
                       </div>
                     </td>
                   </tr>
-                ) : currentMovements.map((m) => (
-                  <tr key={m.id} className="hover:bg-surface-container-low transition-all group">
-                    <td className="px-6 py-4 text-body-md">
-                      <div className="font-medium">{formatDate(m.created_at)}</div>
-                      <div className="text-caption text-outline">{formatTime(m.created_at)}</div>
-                    </td>
-                    <td className="px-6 py-4 text-body-md">
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-outline text-[20px]">
-                          {getOriginIcon(m.categoria)}
+                ) : (
+                  currentMovements.map((m) => (
+                    <tr key={m.id} className="hover:bg-surface-container-low transition-all group">
+                      <td className="px-6 py-4 text-body-md">
+                        <div className="font-medium">{formatDate(m.created_at)}</div>
+                        <div className="text-caption text-outline">{formatTime(m.created_at)}</div>
+                      </td>
+                      <td className="px-6 py-4 text-body-md">
+                        <div className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-outline text-[20px]">
+                            {getOriginIcon(m.categoria)}
+                          </span>
+                          {m.categoria || "Caja Principal"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`px-3 py-1 rounded-full text-caption font-bold ${
+                            m.tipo === "Ingreso"
+                              ? "bg-secondary/10 text-secondary"
+                              : "bg-error/10 text-error"
+                          }`}
+                        >
+                          {m.tipo.toUpperCase()}
                         </span>
-                        {m.categoria || "Caja Principal"}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-caption font-bold ${m.tipo === "Ingreso"
-                          ? "bg-secondary/10 text-secondary"
-                          : "bg-error/10 text-error"
-                        }`}>
-                        {m.tipo.toUpperCase()}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-body-md">{m.metodo}</td>
-                    <td className={`px-6 py-4 text-body-md text-right font-bold ${m.tipo === "Ingreso" ? "text-on-surface" : "text-error"
-                      }`}>
-                      {m.tipo === "Ingreso" ? "+" : "-"}${Number(m.monto).toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-150">
-                        <button
-                          type="button"
-                          aria-label="Ver detalles"
-                          onClick={() => handleViewClick(m)}
-                          className="text-outline hover:text-primary transition-all p-1 cursor-pointer"
-                          title="Ver detalles"
-                        >
-                          <span className="material-symbols-outlined text-[20px]">visibility</span>
-                        </button>
-                        <button
-                          type="button"
-                          aria-label="Editar"
-                          onClick={() => handleEditClick(m)}
-                          className="text-outline hover:text-primary transition-all p-1 cursor-pointer"
-                          title="Editar"
-                        >
-                          <span className="material-symbols-outlined text-[20px]">edit</span>
-                        </button>
-                        <button
-                          type="button"
-                          aria-label="Eliminar"
-                          onClick={() => handleDeleteClick(m)}
-                          className="text-outline hover:text-error transition-all p-1 cursor-pointer"
-                          title="Eliminar"
-                        >
-                          <span className="material-symbols-outlined text-[20px]">delete</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-6 py-4 text-body-md">{m.metodo}</td>
+                      <td
+                        className={`px-6 py-4 text-body-md text-right font-bold ${
+                          m.tipo === "Ingreso" ? "text-on-surface" : "text-error"
+                        }`}
+                      >
+                        {m.tipo === "Ingreso" ? "+" : "-"}${Number(m.monto).toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-150">
+                          <button
+                            type="button"
+                            aria-label="Ver detalles"
+                            onClick={() => handleViewClick(m)}
+                            className="text-outline hover:text-primary transition-all p-1 cursor-pointer"
+                            title="Ver detalles"
+                          >
+                            <span className="material-symbols-outlined text-[20px]">
+                              visibility
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            aria-label="Editar"
+                            onClick={() => handleEditClick(m)}
+                            className="text-outline hover:text-primary transition-all p-1 cursor-pointer"
+                            title="Editar"
+                          >
+                            <span className="material-symbols-outlined text-[20px]">edit</span>
+                          </button>
+                          <button
+                            type="button"
+                            aria-label="Eliminar"
+                            onClick={() => handleDeleteClick(m)}
+                            className="text-outline hover:text-error transition-all p-1 cursor-pointer"
+                            title="Eliminar"
+                          >
+                            <span className="material-symbols-outlined text-[20px]">delete</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
                 {!isLoading && filteredMovements.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-on-surface-variant text-body-md">
+                    <td
+                      colSpan={6}
+                      className="px-6 py-12 text-center text-on-surface-variant text-body-md"
+                    >
                       No se encontraron movimientos con los filtros aplicados.
                     </td>
                   </tr>
@@ -610,11 +689,12 @@ function MovimientosPage() {
           {/* Pagination */}
           <div className="px-6 py-4 bg-white flex items-center justify-between border-t border-outline-variant">
             <p className="text-caption text-outline">
-              Mostrando {totalItems > 0 ? startIndex + 1 : 0} a {endIndex} de {totalItems} movimientos
+              Mostrando {totalItems > 0 ? startIndex + 1 : 0} a {endIndex} de {totalItems}{" "}
+              movimientos
             </p>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1 || isLoading}
                 className="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-outline hover:border-primary hover:text-primary transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
               >
@@ -625,16 +705,17 @@ function MovimientosPage() {
                   key={page}
                   onClick={() => setCurrentPage(page)}
                   disabled={isLoading}
-                  className={`w-8 h-8 flex items-center justify-center rounded font-label-md cursor-pointer ${currentPage === page
+                  className={`w-8 h-8 flex items-center justify-center rounded font-label-md cursor-pointer ${
+                    currentPage === page
                       ? "bg-primary text-white"
                       : "border border-outline-variant text-outline hover:border-primary hover:text-primary transition-all"
-                    }`}
+                  }`}
                 >
                   {page}
                 </button>
               ))}
               <button
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages || isLoading}
                 className="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-outline hover:border-primary hover:text-primary transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
               >
@@ -652,13 +733,18 @@ function MovimientosPage() {
             </div>
             <h3 className="font-title-lg text-title-lg text-primary mb-4">Nota de Conciliación</h3>
             <p className="text-body-md text-on-surface-variant max-w-2xl leading-relaxed">
-              Todos los movimientos mostrados arriba están sincronizados con la pasarela de pagos central. Los egresos por comisiones se liquidan automáticamente al final del día laboral. Asegúrese de que los registros manuales de caja chica coincidan con los comprobantes físicos antes del cierre.
+              Todos los movimientos mostrados arriba están sincronizados con la pasarela de pagos
+              central. Los egresos por comisiones se liquidan automáticamente al final del día
+              laboral. Asegúrese de que los registros manuales de caja chica coincidan con los
+              comprobantes físicos antes del cierre.
             </p>
             <div className="mt-6 flex gap-4">
               <div className="flex flex-col">
                 <span className="text-caption text-outline uppercase font-bold">Último Cierre</span>
                 <span className="text-body-md font-medium">
-                  {latestCajaCierre ? getCierreText(latestCajaCierre.fecha_cierre) : "Hace 14 horas"}
+                  {latestCajaCierre
+                    ? getCierreText(latestCajaCierre.fecha_cierre)
+                    : "Hace 14 horas"}
                 </span>
               </div>
               <div className="flex flex-col border-l border-outline-variant pl-4">
@@ -671,13 +757,20 @@ function MovimientosPage() {
             <div>
               <p className="text-label-md opacity-80 mb-1">Volumen Mensual</p>
               <h4 className="text-headline-md">
-                ${volumenMensual.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                $
+                {volumenMensual.toLocaleString("es-PE", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </h4>
             </div>
             <div className="mt-4 pt-4 border-t border-white/20">
               <p className="text-caption opacity-80 mb-2">Meta de Recaudación</p>
               <div className="w-full bg-white/20 rounded-full h-2 overflow-hidden">
-                <div className="bg-white h-full transition-all duration-500" style={{ width: `${metaPorcentaje}%` }}></div>
+                <div
+                  className="bg-white h-full transition-all duration-500"
+                  style={{ width: `${metaPorcentaje}%` }}
+                ></div>
               </div>
               <p className="text-right text-caption mt-1">{metaPorcentaje}% alcanzado</p>
             </div>

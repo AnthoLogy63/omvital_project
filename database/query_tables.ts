@@ -15,7 +15,9 @@ async function main() {
   console.log("=== Querying database status ===");
 
   // 1. Check trabajadores
-  const { data: workers, error: wErr } = await supabase.from("trabajadores").select("id, nombre, rol");
+  const { data: workers, error: wErr } = await supabase
+    .from("trabajadores")
+    .select("id, nombre, rol");
   if (wErr) console.error("Error trabajadores:", wErr);
   else console.log("Trabajadores count:", workers.length, workers);
 

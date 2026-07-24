@@ -64,7 +64,7 @@ function TrabajadoresPage() {
 
         setWorkers(workersData);
         setFeaturedReferrers(featuredData);
-      } catch (err) {
+      } catch (err: unknown) {
         console.error("Error loading data:", err);
         setErrorMsg("No se pudieron cargar los datos de la base de datos.");
       } finally {
@@ -194,10 +194,11 @@ function TrabajadoresPage() {
       // Reload featured referrers
       const updatedFeatured = await getReferenciadoresDestacados();
       setFeaturedReferrers(updatedFeatured);
-    } catch (err) {
-      const error = err as Error;
+    } catch (err: unknown) {
       console.error("Error saving worker:", err);
-      setErrorMsg(error.message || "Error al guardar el trabajador en Supabase.");
+      setErrorMsg(
+        err instanceof Error ? err.message : "Error al guardar el trabajador en Supabase.",
+      );
     } finally {
       setIsSubmitting(false);
     }

@@ -40,7 +40,7 @@ async function getOrCreateActiveCajaId(): Promise<string> {
     .from("sesiones_caja")
     .insert([
       {
-        monto_apertura: 0.00,
+        monto_apertura: 0.0,
         estado: "Abierto",
       },
     ])
@@ -56,8 +56,8 @@ async function getOrCreateActiveCajaId(): Promise<string> {
 }
 
 // 1. Fetch all movements
-export const getMovements = createServerFn({ method: "GET" })
-  .handler(async (): Promise<DbMovimiento[]> => {
+export const getMovements = createServerFn({ method: "GET" }).handler(
+  async (): Promise<DbMovimiento[]> => {
     const { data, error } = await supabase
       .from("movimientos")
       .select("*")
@@ -69,7 +69,8 @@ export const getMovements = createServerFn({ method: "GET" })
     }
 
     return (data || []) as DbMovimiento[];
-  });
+  },
+);
 
 // 2. Insert new movement
 export const insertMovement = createServerFn({ method: "POST" })
@@ -82,7 +83,7 @@ export const insertMovement = createServerFn({ method: "POST" })
       monto: z.number().positive("El monto debe ser mayor a 0"),
       estado: z.string().default("Completado"),
       nota: z.string().nullable().optional(),
-    })
+    }),
   )
   .handler(async ({ data: input }): Promise<DbMovimiento> => {
     const cajaId = await getOrCreateActiveCajaId();
@@ -124,7 +125,7 @@ export const updateMovement = createServerFn({ method: "POST" })
       monto: z.number().positive("El monto debe ser mayor a 0"),
       estado: z.string().default("Completado"),
       nota: z.string().nullable().optional(),
-    })
+    }),
   )
   .handler(async ({ data: input }): Promise<DbMovimiento> => {
     const { data, error } = await supabase
@@ -155,13 +156,10 @@ export const deleteMovement = createServerFn({ method: "POST" })
   .validator(
     z.object({
       id: z.string().min(1),
-    })
+    }),
   )
   .handler(async ({ data: input }): Promise<{ success: boolean }> => {
-    const { error } = await supabase
-      .from("movimientos")
-      .delete()
-      .eq("id", input.id);
+    const { error } = await supabase.from("movimientos").delete().eq("id", input.id);
 
     if (error) {
       console.error("Error deleting movement in Supabase:", error);
@@ -172,8 +170,8 @@ export const deleteMovement = createServerFn({ method: "POST" })
   });
 
 // 5. Get last closed caja closure details
-export const getLatestCajaCierre = createServerFn({ method: "GET" })
-  .handler(async (): Promise<{ fecha_cierre: string | null } | null> => {
+export const getLatestCajaCierre = createServerFn({ method: "GET" }).handler(
+  async (): Promise<{ fecha_cierre: string | null } | null> => {
     const { data, error } = await supabase
       .from("sesiones_caja")
       .select("fecha_cierre")
@@ -188,4 +186,5 @@ export const getLatestCajaCierre = createServerFn({ method: "GET" })
     }
 
     return data;
-  });
+  },
+);

@@ -109,19 +109,19 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   beforeLoad: async ({ location }) => {
     // Si la persona intenta ir a login se permite sin trabas
-    if (location.pathname === '/login') return
+    if (location.pathname === "/login") return;
 
-    const { supabase } = await import('../lib/supabase')
-    const { data } = await supabase.auth.getSession()
+    const { supabase } = await import("../lib/supabase");
+    const { data } = await supabase.auth.getSession();
 
     // Si no hay una sesión activa, se manda a la pantalla de login
     if (!data.session) {
       throw redirect({
-        to: '/login',
+        to: "/login",
         search: {
           redirect: location.href,
         },
-      })
+      });
     }
   },
   head: () => ({
@@ -231,10 +231,10 @@ function Sidebar() {
         </a>
         <button
           onClick={async () => {
-            const { supabase } = await import('../lib/supabase')
-            await supabase.auth.signOut()
-            router.navigate({ to: '/login' })
-            router.invalidate()
+            const { supabase } = await import("../lib/supabase");
+            await supabase.auth.signOut();
+            router.navigate({ to: "/login" });
+            router.invalidate();
           }}
           className="w-full flex items-center px-4 py-3 hover:bg-white/10 transition-colors duration-200 text-white cursor-pointer text-left"
         >
@@ -293,7 +293,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   // Evaluamos la ruta actual del sistema
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isLoginPage = pathname === '/login';
+  const isLoginPage = pathname === "/login";
 
   return (
     <QueryClientProvider client={queryClient}>

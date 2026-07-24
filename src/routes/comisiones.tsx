@@ -70,7 +70,7 @@ function Page() {
       // Filter out inactive workers if any
       setTrabajadores(workData.filter((w) => w.estado === "Activo"));
       setPacientes(pacData);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error fetching data:", err);
       setErrorMsg("Ocurrió un error al consultar los datos de la base de datos.");
     } finally {
@@ -126,10 +126,9 @@ function Page() {
       setMonto("");
 
       await fetchData();
-    } catch (err) {
-      const error = err as Error;
+    } catch (err: unknown) {
       console.error("Error inserting commission:", err);
-      setErrorMsg(error.message || "Error al registrar la comisión.");
+      setErrorMsg(err instanceof Error ? err.message : "Error al registrar la comisión.");
     } finally {
       setSubmitting(false);
     }
@@ -148,10 +147,11 @@ function Page() {
       });
 
       await fetchData();
-    } catch (err) {
-      const error = err as Error;
+    } catch (err: unknown) {
       console.error("Error updating commission state:", err);
-      setErrorMsg(error.message || "Error al actualizar el estado de la comisión.");
+      setErrorMsg(
+        err instanceof Error ? err.message : "Error al actualizar el estado de la comisión.",
+      );
       setLoading(false);
     }
   };
@@ -169,10 +169,9 @@ function Page() {
 
       setComisionToDelete(null);
       await fetchData();
-    } catch (err) {
-      const error = err as Error;
+    } catch (err: unknown) {
       console.error("Error deleting commission:", err);
-      setErrorMsg(error.message || "Error al eliminar la comisión.");
+      setErrorMsg(err instanceof Error ? err.message : "Error al eliminar la comisión.");
     } finally {
       setDeleting(false);
     }
