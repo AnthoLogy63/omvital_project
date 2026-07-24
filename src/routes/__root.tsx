@@ -111,17 +111,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     // Si la persona intenta ir a login se permite sin trabas
     if (location.pathname === '/login') return
 
-    const { supabase } = await import('../lib/supabase')
-    const { data } = await supabase.auth.getSession()
+    // Solo verificamos la sesión en el cliente (navegador)
+    // En el servidor (SSR) no hay acceso a localStorage, por lo que getSession() siempre retornaría null
+    if (typeof window !== 'undefined') {
+      const { supabase } = await import('../lib/supabase')
+      const { data } = await supabase.auth.getSession()
 
-    // Si no hay una sesión activa, se manda a la pantalla de login
-    if (!data.session) {
-      throw redirect({
-        to: '/login',
-        search: {
-          redirect: location.href,
-        },
-      })
+      // Si no hay una sesión activa, se manda a la pantalla de login
+      if (!data.session) {
+        throw redirect({
+          to: '/login',
+          search: {
+            redirect: location.href,
+          },
+        })
+      }
     }
   },
   head: () => ({
