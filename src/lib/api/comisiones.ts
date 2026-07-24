@@ -78,7 +78,7 @@ export const getComisiones = createServerFn({ method: "GET" }).handler(
 
 // 2. Insert commission
 export const insertComision = createServerFn({ method: "POST" })
-  .validator(
+  .inputValidator(
     z.object({
       trabajador_id: z.string().uuid("ID de trabajador inválido"),
       paciente_id: z.string().uuid("ID de paciente inválido"),
@@ -112,7 +112,7 @@ export const insertComision = createServerFn({ method: "POST" })
 
 // 3. Mark commission status (e.g. Paid)
 export const updateComisionEstado = createServerFn({ method: "POST" })
-  .validator(
+  .inputValidator(
     z.object({
       id: z.string().uuid(),
       estado: z.enum(["Pendiente", "Pagado"]),
@@ -155,7 +155,7 @@ export const getPacientes = createServerFn({ method: "GET" }).handler(
 
 // 5. Delete commission
 export const deleteComision = createServerFn({ method: "POST" })
-  .validator(
+  .inputValidator(
     z.object({
       id: z.string().uuid("ID de comisión inválido"),
     }),

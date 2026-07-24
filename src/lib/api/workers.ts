@@ -41,7 +41,7 @@ export const getTrabajadores = createServerFn({ method: "GET" }).handler(
 
 // 2. Register worker
 export const insertTrabajador = createServerFn({ method: "POST" })
-  .validator(
+  .inputValidator(
     z.object({
       nombre: z.string().min(1, "El nombre es obligatorio"),
       dni: z.string().min(1, "El DNI es obligatorio"),
@@ -77,7 +77,7 @@ export const insertTrabajador = createServerFn({ method: "POST" })
 
 // 3. Update worker details
 export const updateTrabajador = createServerFn({ method: "POST" })
-  .validator(
+  .inputValidator(
     z.object({
       id: z.string().min(1),
       nombre: z.string().min(1, "El nombre es obligatorio"),

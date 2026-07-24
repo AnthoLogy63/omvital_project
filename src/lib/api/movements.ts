@@ -73,7 +73,7 @@ export const getMovements = createServerFn({ method: "GET" })
 
 // 2. Insert new movement
 export const insertMovement = createServerFn({ method: "POST" })
-  .validator(
+  .inputValidator(
     z.object({
       tipo: z.enum(["Ingreso", "Egreso"]),
       concepto: z.string().min(1, "El concepto es obligatorio"),
@@ -114,7 +114,7 @@ export const insertMovement = createServerFn({ method: "POST" })
 
 // 3. Update movement details
 export const updateMovement = createServerFn({ method: "POST" })
-  .validator(
+  .inputValidator(
     z.object({
       id: z.string().min(1),
       tipo: z.enum(["Ingreso", "Egreso"]),
@@ -152,7 +152,7 @@ export const updateMovement = createServerFn({ method: "POST" })
 
 // 4. Delete movement
 export const deleteMovement = createServerFn({ method: "POST" })
-  .validator(
+  .inputValidator(
     z.object({
       id: z.string().min(1),
     })

@@ -51,7 +51,7 @@ function getInitials(name: string) {
   return name.substring(0, 2).toUpperCase();
 }
 
-function getCategoryColor(cat: string) {
+function getCategoryColor(cat?: string | null) {
   if (!cat) return "bg-outline-variant/20 text-on-surface";
   const catUpper = cat.toUpperCase();
   if (catUpper.includes("REHABILITACIÓN")) return "bg-primary-container/10 text-primary";
@@ -282,7 +282,7 @@ function DashboardPage() {
                 ) : (
                   debts.map((deuda) => {
                     const sesionesPendientes =
-                      deuda.paquete?.cantidad_sesiones - deuda.sesiones_realizadas;
+                      (deuda.paquete?.cantidad_sesiones ?? 0) - deuda.sesiones_realizadas;
                     return (
                       <div key={deuda.id} className="flex justify-between items-center group">
                         <div>

@@ -104,7 +104,7 @@ export const getPaquetes = createServerFn({ method: "GET" }).handler(
 
 // 3. Register a new sale of package
 export const insertPaqueteCliente = createServerFn({ method: "POST" })
-  .validator(
+  .inputValidator(
     z.object({
       paciente_id: z.string().uuid("ID de paciente inválido"),
       paquete_id: z.string().uuid("ID de paquete inválido"),
@@ -218,14 +218,14 @@ export const insertPaqueteCliente = createServerFn({ method: "POST" })
 
 // 4. Register a payment (amortización)
 export const insertPagoPaqueteCliente = createServerFn({ method: "POST" })
-  .validator(
+  .inputValidator(
     z.object({
       paquete_cliente_id: z.string().uuid("ID de paquete cliente inválido"),
       monto: z.number().positive("El monto de pago debe ser positivo"),
       metodo: z.enum(["Efectivo", "Yape", "Plin", "Transferencia", "Tarjeta"]),
     }),
   )
-  .handler(async ({ data: input }): Promise<unknown> => {
+  .handler(async ({ data: input }): Promise<any> => {
     // Check if there is an active session of cash
     const { data: activeCaja, error: cajaError } = await supabase
       .from("sesiones_caja")
@@ -337,14 +337,14 @@ export const insertPagoPaqueteCliente = createServerFn({ method: "POST" })
 
 // 5. Register session attendance
 export const insertSesionPaciente = createServerFn({ method: "POST" })
-  .validator(
+  .inputValidator(
     z.object({
       paquete_cliente_id: z.string().uuid("ID de paquete cliente inválido"),
       terapeuta_id: z.string().uuid("ID de terapeuta inválido"),
       notas: z.string().optional().nullable(),
     }),
   )
-  .handler(async ({ data: input }): Promise<unknown> => {
+  .handler(async ({ data: input }): Promise<any> => {
     // Fetch package client status
     const { data: sale, error: fetchError } = await supabase
       .from("paquetes_cliente")
@@ -365,7 +365,7 @@ export const insertSesionPaciente = createServerFn({ method: "POST" })
       throw new Error("No se encontró el paquete del cliente especificado.");
     }
 
-    const currentSale = sale as {
+    const currentSale = sale as unknown as {
       id: string;
       sesiones_realizadas: number;
       paquetes: { cantidad_sesiones: number } | null;
@@ -411,7 +411,7 @@ export const insertSesionPaciente = createServerFn({ method: "POST" })
 
 // 6. Fetch sessions history for a package
 export const getSesionesPaciente = createServerFn({ method: "GET" })
-  .validator(z.string().uuid("ID de paquete cliente inválido"))
+  .inputValidator(z.string().uuid("ID de paquete cliente inválido"))
   .handler(async ({ data: id }): Promise<DbSesionPaciente[]> => {
     const { data, error } = await supabase
       .from("sesiones_paciente")
