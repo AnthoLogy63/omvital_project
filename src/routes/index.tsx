@@ -78,7 +78,7 @@ function DashboardPage() {
   };
 
   return (
-    <main className="pt-[64px] pl-[260px] h-screen overflow-y-auto relative">
+    <div className="relative">
       <div className="p-container_padding space-y-stack_lg pb-24">
         {/* Welcome Header */}
         <div className="flex items-end justify-between">
@@ -371,6 +371,6 @@ function DashboardPage() {
       >
         <span className="material-symbols-outlined text-[32px]">add</span>
       </Link>
-    </main>
+    </div>
   );
 }

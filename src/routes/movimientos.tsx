@@ -376,52 +376,27 @@ function MovimientosPage() {
   const currentMovements = filteredMovements.slice(startIndex, endIndex);
 
   return (
-    <main className="ml-[260px] flex flex-col min-h-screen">
-      {/* Top Navigation Bar */}
-      <header className="fixed top-0 right-0 h-[64px] w-[calc(100%-260px)] bg-surface/90 backdrop-blur-sm border-b border-outline-variant flex items-center justify-between px-container_padding z-40">
-        <div className="flex items-center gap-4 flex-1">
-          <div className="relative w-full max-w-md">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-            <input
-              className="w-full bg-surface-container border border-outline-variant rounded px-10 py-2 text-body-md focus:outline-none focus:border-primary transition-all"
-              placeholder="Buscar movimientos..."
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="flex items-center gap-6">
-          <button type="button" aria-label="Notificaciones" className="relative text-on-surface-variant hover:text-primary transition-all cursor-pointer active:opacity-70">
-            <span className="material-symbols-outlined">notifications</span>
-            <span className="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
-          </button>
-          <button className="text-on-surface-variant hover:text-primary transition-all cursor-pointer active:opacity-70">
-            <span className="material-symbols-outlined">help</span>
-          </button>
-          <div className="flex items-center gap-3 pl-4 border-l border-outline-variant">
-            <div className="text-right">
-              <p className="font-label-md text-label-md font-bold">Dr. Armando Casas</p>
-              <p className="text-caption text-outline">Administrador</p>
-            </div>
-            <img
-              alt="Administrador"
-              className="w-10 h-10 rounded-full object-cover border border-outline-variant"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVLQ1qx35BHja_IaMLxutb85WKkfEfGlbHl_brTVcm-3q1Yl4KWZFwwNyvyj0xs7APVWPgr1zajrs0nB56mNFxy-clAUXnPiMIdvnkpjz8VwBWHB9JZBOH4FgrnWULe1ph6SvIU-dNMQJCGjXJmB0t0_KjcLBd22mm7NRGgbPBeMPWDBMTu9L9w6EMOFsP9wfqNMTm8s0hav38KgHwS97KCIclYw5N4wU4_qHoT4nApOmq3kSqfB8PQg9_LHrcvr5ZkGljPYTJUxU"
-            />
-          </div>
-        </div>
-      </header>
-
-      {/* Workspace Content */}
-      <section className="mt-[64px] p-container_padding space-y-stack_lg">
+    <div className="flex flex-col min-h-full">
+      <section className="p-container_padding space-y-stack_lg">
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="font-headline-md text-headline-md text-primary">Movimientos</h2>
             <p className="text-body-md text-on-surface-variant">Libro contable centralizado de la clínica.</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+            <div className="relative w-full sm:w-64">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">
+                search
+              </span>
+              <input
+                className="w-full bg-surface-container border border-outline-variant rounded px-10 py-2 text-body-md focus:outline-none focus:border-primary transition-all"
+                placeholder="Buscar movimientos..."
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
             <button
               onClick={handleExportCSV}
               disabled={filteredMovements.length === 0}
@@ -896,6 +871,6 @@ function MovimientosPage() {
           </div>
         </div>
       )}
-    </main>
+    </div>
   );
 }

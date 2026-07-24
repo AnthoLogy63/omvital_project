@@ -274,14 +274,15 @@ function TopBar() {
         <div className="h-8 w-px bg-outline-variant"></div>
         <div className="flex items-center gap-3 cursor-pointer group">
           <div className="text-right hidden sm:block">
-            <p className="font-label-md text-label-md text-on-surface font-bold">William Nuñez</p>
+            <p className="font-label-md text-label-md text-on-surface font-bold">ADMIN</p>
             <p className="font-caption text-caption text-on-surface-variant">Administrador</p>
           </div>
-          <img
-            alt="Administrador"
-            className="w-10 h-10 rounded-full border border-outline-variant object-cover"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGxGuSpawvtWTnaiZRbsoO_InEitpMxLx1P5w9HDNHPOvwcIP164yS2o01mm6nsnFp4BS3rshBIxjSnt8ZUQJmuq6cCddwz6whmVKRzEpaGxd8UhcraEcsLK99K0snM25Qys2N3ONvCTEXg_i7PH483mnhvAO4S4ATJe4nZPLjPKkmgYqXVNabrW_FwcAzzb8hI908jhLmYEoHsN4CNF0taUIaygoHWvnZlnEvcxeB2mXV7HBme8MG2h4Hm69ZuX4Z9B8CBZe-5cE"
-          />
+          <div
+            aria-label="Administrador"
+            className="w-10 h-10 rounded-full border border-outline-variant bg-primary text-on-primary flex items-center justify-center font-bold text-sm"
+          >
+            A
+          </div>
         </div>
       </div>
     </header>

@@ -336,8 +336,8 @@ function Page() {
   };
 
   return (
-    <main className="pt-[64px] pl-[260px] h-screen overflow-y-auto relative bg-background">
-      <div className="p-container_padding space-y-stack_lg pb-24 max-w-[1400px] mx-auto">
+    <div className="relative bg-background">
+      <div className="p-container_padding space-y-stack_lg pb-24">
         {/* Header Title */}
         <div className="flex items-center justify-between">
           <div>
@@ -1021,6 +1021,6 @@ function Page() {
           </div>
         </div>
       )}
-    </main>
+    </div>
   );
 }
