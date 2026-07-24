@@ -426,7 +426,7 @@ function TrabajadoresPage() {
   });
 
   return (
-    <main className="ml-[260px] mt-[64px] p-stack_lg h-[calc(100vh-64px)] overflow-y-auto">
+    <div className="p-stack_lg">
       {/* Header Section */}
       <div className="flex items-center justify-between mb-stack_lg">
         <div>
@@ -1085,6 +1085,6 @@ function TrabajadoresPage() {
           </div>
         </div>
       )}
-    </main>
+    </div>
   );
 }

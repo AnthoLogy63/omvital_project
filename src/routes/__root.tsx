@@ -7,6 +7,7 @@ import {
   useRouterState,
   HeadContent,
   Scripts,
+  redirect,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
@@ -106,6 +107,23 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  beforeLoad: async ({ location }) => {
+    // Si la persona intenta ir a login se permite sin trabas
+    if (location.pathname === "/login") return;
+
+    const { supabase } = await import("../lib/supabase");
+    const { data } = await supabase.auth.getSession();
+
+    // Si no hay una sesión activa, se manda a la pantalla de login
+    if (!data.session) {
+      throw redirect({
+        to: "/login",
+        search: {
+          redirect: location.href,
+        },
+      });
+    }
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -177,6 +195,7 @@ const NAV = [
 
 function Sidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const router = useRouter();
   return (
     <aside className="fixed left-0 top-0 h-full w-[260px] border-r border-primary flex flex-col z-50 overflow-y-auto bg-primary-container">
       <div className="px-6 py-8">
@@ -210,13 +229,18 @@ function Sidebar() {
           <span className="material-symbols-outlined mr-3">settings</span>
           <span className="font-label-md text-label-md">Configuración</span>
         </a>
-        <a
-          className="flex items-center px-4 py-3 hover:bg-white/10 transition-colors duration-200 text-white"
-          href="#"
+        <button
+          onClick={async () => {
+            const { supabase } = await import("../lib/supabase");
+            await supabase.auth.signOut();
+            router.navigate({ to: "/login" });
+            router.invalidate();
+          }}
+          className="w-full flex items-center px-4 py-3 hover:bg-white/10 transition-colors duration-200 text-white cursor-pointer text-left"
         >
           <span className="material-symbols-outlined mr-3">logout</span>
           <span className="font-label-md text-label-md">Cerrar Sesión</span>
-        </a>
+        </button>
       </div>
     </aside>
   );
@@ -250,16 +274,15 @@ function TopBar() {
         <div className="h-8 w-px bg-outline-variant"></div>
         <div className="flex items-center gap-3 cursor-pointer group">
           <div className="text-right hidden sm:block">
-            <p className="font-label-md text-label-md text-on-surface font-bold">
-              Dr. Armando Casas
-            </p>
+            <p className="font-label-md text-label-md text-on-surface font-bold">ADMIN</p>
             <p className="font-caption text-caption text-on-surface-variant">Administrador</p>
           </div>
-          <img
-            alt="Administrador"
-            className="w-10 h-10 rounded-full border border-outline-variant object-cover"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGxGuSpawvtWTnaiZRbsoO_InEitpMxLx1P5w9HDNHPOvwcIP164yS2o01mm6nsnFp4BS3rshBIxjSnt8ZUQJmuq6cCddwz6whmVKRzEpaGxd8UhcraEcsLK99K0snM25Qys2N3ONvCTEXg_i7PH483mnhvAO4S4ATJe4nZPLjPKkmgYqXVNabrW_FwcAzzb8hI908jhLmYEoHsN4CNF0taUIaygoHWvnZlnEvcxeB2mXV7HBme8MG2h4Hm69ZuX4Z9B8CBZe-5cE"
-          />
+          <div
+            aria-label="Administrador"
+            className="w-10 h-10 rounded-full border border-outline-variant bg-primary text-on-primary flex items-center justify-center font-bold text-sm"
+          >
+            A
+          </div>
         </div>
       </div>
     </header>
@@ -268,11 +291,27 @@ function TopBar() {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  // Evaluamos la ruta actual del sistema
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isLoginPage = pathname === "/login";
+
   return (
     <QueryClientProvider client={queryClient}>
-      <Sidebar />
-      <TopBar />
-      <Outlet />
+      {isLoginPage ? (
+        // Si está en el login, renderiza el contenido limpio sin barras laterales ni superiores
+        <main className="w-full min-h-screen bg-background overflow-y-auto">
+          <Outlet />
+        </main>
+      ) : (
+        // Si es cualquier otra página, mantiene el Layout con Sidebar y TopBar para tus compañeros
+        <>
+          <Sidebar />
+          <TopBar />
+          <main className="pl-[260px] pt-[64px] h-screen overflow-y-auto bg-background">
+            <Outlet />
+          </main>
+        </>
+      )}
     </QueryClientProvider>
   );
 }

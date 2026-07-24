@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-const html = `<main class="ml-[260px] mt-[64px] p-container_padding min-h-screen">
+const html = `<div class="p-container_padding min-h-full">
 <!-- Header & Date Filter Section -->
 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
 <div>
@@ -206,7 +206,7 @@ const html = `<main class="ml-[260px] mt-[64px] p-container_padding min-h-screen
 </div>
 </div>
 </div>
-</main>`;
+</div>`;
 
 export const Route = createFileRoute("/reportes")({
   head: () => ({

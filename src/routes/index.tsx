@@ -1,6 +1,30 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { getDashboardData } from "../lib/api/dashboard";
 
+interface DashboardMovement {
+  id: string;
+  created_at: string;
+  concepto: string;
+  categoria?: string | null;
+  tipo: string;
+  monto: number;
+  estado: string;
+}
+
+interface DashboardDebt {
+  id: string;
+  paciente?: { nombre: string } | null;
+  paquete?: { nombre: string; cantidad_sesiones: number } | null;
+  sesiones_realizadas: number;
+  deuda: number;
+}
+
+interface DashboardCommission {
+  id: string;
+  trabajador?: { nombre: string } | null;
+  monto: number;
+}
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -40,10 +64,21 @@ function getCategoryColor(cat: string) {
 }
 
 function DashboardPage() {
-  const { stats, movements, debts, commissions } = Route.useLoaderData();
+  const { stats, movements, debts, commissions } = Route.useLoaderData() as {
+    stats: {
+      ingresos: number;
+      egresos: number;
+      saldo: number;
+      pendingCount: number;
+      isCajaOpen: boolean;
+    };
+    movements: DashboardMovement[];
+    debts: DashboardDebt[];
+    commissions: DashboardCommission[];
+  };
 
   return (
-    <main className="pt-[64px] pl-[260px] h-screen overflow-y-auto relative">
+    <div className="relative">
       <div className="p-container_padding space-y-stack_lg pb-24">
         {/* Welcome Header */}
         <div className="flex items-end justify-between">
@@ -336,6 +371,6 @@ function DashboardPage() {
       >
         <span className="material-symbols-outlined text-[32px]">add</span>
       </Link>
-    </main>
+    </div>
   );
 }

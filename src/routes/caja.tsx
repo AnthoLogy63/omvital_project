@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-const html = `<main class="ml-[260px] pt-[64px] min-h-screen">
+const html = `<div class="min-h-full">
 <div class="p-container_padding">
 <!-- Summary Bar -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-stack_lg">
@@ -221,7 +221,7 @@ const html = `<main class="ml-[260px] pt-[64px] min-h-screen">
 </div>
 </div>
 </div>
-</main>`;
+</div>`;
 
 export const Route = createFileRoute("/caja")({
   head: () => ({

@@ -188,6 +188,37 @@ Para compilar y empaquetar el proyecto para producción:
 
 ---
 
+## 🐳 Despliegue en Producción (Docker, OCI y Cloudflare)
+
+El proyecto está configurado para ser desplegado fácilmente en un Servidor Virtual Privado (VPS) en **Oracle Cloud Infrastructure (OCI)** utilizando **Docker Compose** y **Cloudflare** como CDN.
+
+Para más información, consulta el informe completo de despliegue en [reporte_despliegue.md](file:///home/rikich/repos/academicos/tecn_inf/omvital_project/deploys/reporte_despliegue.md).
+
+### Resumen del Proceso de Despliegue:
+
+1. **Configuración de Red en Oracle Cloud (OCI):**
+   - Habilite una regla de ingreso (Ingress Rule) en la VCN para permitir tráfico en el puerto `8085` (TCP).
+   - Abra el puerto `8085` en el firewall de Ubuntu ejecutando:
+     ```bash
+     sudo iptables -I INPUT 6 -p tcp --dport 8085 -j ACCEPT
+     sudo apt-get install iptables-persistent -y
+     sudo netfilter-persistent save
+     ```
+
+2. **Configuración en Cloudflare:**
+   - Cree un registro de tipo **A** apuntando a la IP de su servidor con el **Proxy (Nube Naranja)** activo.
+   - Configure el modo de SSL/TLS en **Flexible** o **Full (Strict)**.
+
+3. **Ejecución de Contenedores:**
+   - Clone el repositorio en su servidor VPS.
+   - Inicie los servicios utilizando Docker Compose:
+     ```bash
+     sudo docker compose -f deploys/docker-compose.yml up -d --build
+     ```
+   - Esto levantará el contenedor de la aplicación Bun (puerto interno 3000) y un contenedor de Nginx que actúa como proxy inverso y está expuesto en el puerto host `8085`.
+
+---
+
 ## 👥 Integrantes del Equipo y Distribución de Trabajo
 
 ### Equipo de Sistemas Distribuidos

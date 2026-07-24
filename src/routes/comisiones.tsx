@@ -383,8 +383,8 @@ function Page() {
   };
 
   return (
-    <main className="ml-[260px] pt-[64px] h-screen overflow-y-auto custom-scrollbar bg-background">
-      <div className="p-container_padding max-w-[1400px] mx-auto space-y-gutter">
+    <div className="custom-scrollbar bg-background">
+      <div className="p-container_padding space-y-gutter">
         {/* Header Section */}
         <div className="flex items-end justify-between">
           <div>
@@ -924,6 +924,6 @@ function Page() {
           </div>
         </div>
       )}
-    </main>
+    </div>
   );
 }
